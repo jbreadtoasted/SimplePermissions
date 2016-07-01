@@ -63,15 +63,15 @@ public class UserSubject extends SimpleSubject {
 		
 		for (GroupSubject g : this.groups) {
 			if (g.getWeight()>heaviest.getWeight()) {
-				Boolean b = g.hasPermission(permission);
-				if (b!=null && b) {
+				Boolean b = g.getSubjectData().getPermissions(null).get(permission);
+				if (b!=null) {
 					heaviest = g;
 				}
 			}
 		}
 		
-		Boolean b = heaviest.hasPermission(permission);
-		if (b!=null && b) {
+		Boolean b = heaviest.getSubjectData().getPermissions(null).get(permission);
+		if (b!=null) {
 			return Optional.of(heaviest);
 		}
 		return Optional.empty();

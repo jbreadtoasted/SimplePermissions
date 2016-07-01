@@ -95,12 +95,12 @@ public class GroupSubject extends SimpleSubject {
 		Optional<GroupSubject> g = parent.getHeaviestParentGroupFor(permission);
 		if (g.isPresent() && g.get().getWeight()>parent.getWeight()) {
 			Boolean b = g.get().getSubjectData().getPermissions(null).get(permission);
-			if (b!=null && b) {
+			if (b!=null) {
 				return g;
 			}
 		}
 		Boolean b = parent.getSubjectData().getPermissions(null).get(permission);
-		if (b!=null && b) {
+		if (b!=null) {
 			return Optional.of(parent);
 		}
 		return Optional.empty();
