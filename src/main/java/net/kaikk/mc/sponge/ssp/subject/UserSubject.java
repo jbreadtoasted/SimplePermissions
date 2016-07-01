@@ -48,8 +48,7 @@ public class UserSubject extends SimpleSubject {
 		
 		Optional<GroupSubject> group = this.getHeaviestGroupFor(permission);
 		if (group.isPresent()) {
-			Boolean b = group.get().getSubjectData().getPermissions(null).get(permission);
-			return b ? Tristate.TRUE : Tristate.FALSE;
+			return group.get().getPermissionValue(null, permission);
 		}
 		
 		return this.getDefaultPermissionValue(permission);

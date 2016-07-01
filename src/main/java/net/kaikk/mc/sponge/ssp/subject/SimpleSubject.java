@@ -18,6 +18,8 @@ import org.spongepowered.api.text.Text.Builder;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 
+import net.kaikk.mc.sponge.ssp.Utils;
+
 public class SimpleSubject implements Subject {
 	private String identifier;
 	private SimpleSubjectCollection collection; 
@@ -30,19 +32,16 @@ public class SimpleSubject implements Subject {
 
 	@Override
 	public String getIdentifier() {
-		
 		return identifier;
 	}
 	
 	@Override
 	public Set<Context> getActiveContexts() {
-		
 		return Collections.emptySet();
 	}
 
 	@Override
 	public Optional<CommandSource> getCommandSource() {
-		
 		return Optional.empty();
 	}
 
@@ -53,13 +52,11 @@ public class SimpleSubject implements Subject {
 
 	@Override
 	public SubjectData getSubjectData() {
-		
 		return permissionData;
 	}
 
 	@Override
 	public SubjectData getTransientSubjectData() {
-		
 		return permissionData;
 	}
 
@@ -71,9 +68,24 @@ public class SimpleSubject implements Subject {
 	@Override
 	public Tristate getPermissionValue(Set<Context> contexts, String permission) {
 		Boolean b = permissionData.getPermissions().get(permission);
-		return b==null ? Tristate.UNDEFINED : b ? Tristate.TRUE : Tristate.FALSE;
+		if (b==null) {
+			b = permissionData.getPermissions().get("*");
+			if (b==null) {
+				String[] split = permission.split("[.]");
+				StringBuilder pb = new StringBuilder();
+				for(int i=0; i<split.length-1; i++) {
+					pb.append(split[i]);
+					pb.append('.');
+					b = permissionData.getPermissions().get(pb.toString()+"*");
+					if (b!=null) {
+						break;
+					}
+				}
+			}
+		}
+		return Utils.tristate(b);
 	}
-	
+
 	public Tristate getDefaultPermissionValue(String permission) {
 		return this.getContainingCollection().getDefaults().getPermissionValue(null, permission);
 	}
@@ -85,7 +97,6 @@ public class SimpleSubject implements Subject {
 
 	@Override
 	public List<Subject> getParents(Set<Context> contexts) {
-		
 		return Collections.emptyList();
 	}
 
