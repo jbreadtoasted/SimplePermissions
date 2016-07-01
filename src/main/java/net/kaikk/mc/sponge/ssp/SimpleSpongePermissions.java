@@ -14,6 +14,7 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.context.ContextCalculator;
@@ -30,7 +31,6 @@ import com.google.inject.Inject;
 
 import net.kaikk.mc.sponge.ssp.commands.GroupCommand;
 import net.kaikk.mc.sponge.ssp.commands.GroupsCommand;
-import net.kaikk.mc.sponge.ssp.commands.ReloadCommand;
 import net.kaikk.mc.sponge.ssp.commands.TestCommand;
 import net.kaikk.mc.sponge.ssp.commands.UserCommand;
 import net.kaikk.mc.sponge.ssp.subject.GroupSubject;
@@ -99,14 +99,14 @@ public class SimpleSpongePermissions implements PermissionService {
 				.executor(new GroupsCommand(this)).build(), "pgroups");
 		
 		Sponge.getCommandManager().register(this, CommandSpec.builder()
-				.description(Text.of("SimpleSpongePermissions Reload Command"))
-				.permission("ssp.manage")
-				.executor(new ReloadCommand(this)).build(), "preload");
-		
-		Sponge.getCommandManager().register(this, CommandSpec.builder()
 				.description(Text.of("SimpleSpongePermissions Test Command"))
 				.arguments(GenericArguments.string(Text.of("permission")))
 				.executor(new TestCommand(this)).build(), "ptest");
+	}
+	
+	@Listener
+	public void onServerReload(GameReloadEvent event) throws IOException, ObjectMappingException {
+		this.loadData();
 	}
 
 	@Override
