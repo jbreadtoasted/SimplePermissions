@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.8
+version = '0.9'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'sponge'
+        url = 'http://repo.spongepowered.org/maven'
+    }
+    maven {
+    	name = 'localmaven'
+    	url = 'C:\\Users\\Kai\\.m2\\repository'
+    }
+    maven {
+    	name = 'net.kaikk.mc'
+        url "http://kaikk.net/mc/repo/"
+    }
+}
+
+dependencies {
+	compile 'org.spongepowered:spongeapi:5.0.0-SNAPSHOT'
+}
