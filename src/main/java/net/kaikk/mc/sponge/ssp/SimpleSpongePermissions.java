@@ -49,7 +49,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 
-@Plugin(id="simplespongepermissions", name = "SimpleSpongePermissions", version = "0.9", description = "A very simple basic permissions plugin")
+@Plugin(id="simplespongepermissions", name = "SimpleSpongePermissions", version = "0.9.1", description = "A very simple basic permissions plugin")
 public class SimpleSpongePermissions implements PermissionService {
 	private static SimpleSpongePermissions instance;
 	
