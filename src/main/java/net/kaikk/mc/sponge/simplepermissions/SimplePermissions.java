@@ -1,11 +1,13 @@
 package net.kaikk.mc.sponge.simplepermissions;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.spongepowered.api.Sponge;
@@ -56,6 +58,7 @@ public class SimplePermissions implements PermissionService {
 	private UserSubjectCollection users = new UserSubjectCollection();
 	private GroupSubjectCollection groups = new GroupSubjectCollection();
 	private Map<String, SubjectCollection> knownSubjectsMap = new HashMap<String,SubjectCollection>();
+	private Map<String, SubjectCollection> customSubjectsMap = new HashMap<String,SubjectCollection>();
 	
 	@Inject
 	@ConfigDir(sharedRoot = false)
@@ -136,7 +139,14 @@ public class SimplePermissions implements PermissionService {
 		} else if (identifier.equals(PermissionService.SUBJECTS_GROUP)) {
 			return this.getGroupSubjects();
 		}
-		throw new UnsupportedOperationException("Identifier "+identifier+" is not implemented yet.");
+		
+		SubjectCollection collection = knownSubjectsMap.get(identifier);
+		if (collection==null) {
+			collection = new SimpleSubjectCollection(identifier);
+			knownSubjectsMap.put(identifier, collection);
+			customSubjectsMap.put(identifier, collection);
+		}
+		return collection;
 	}
 
 	@Override
@@ -165,12 +175,29 @@ public class SimplePermissions implements PermissionService {
 			ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(privateConfigDir.resolve("groups.conf")).build();
 			ConfigurationNode rootNode = loader.load();
 			this.groups = rootNode.getValue(TypeToken.of(GroupSubjectCollection.class), this.groups);
+			knownSubjectsMap.put(PermissionService.SUBJECTS_GROUP, this.getGroupSubjects());
 		}
 		
 		if (privateConfigDir.resolve("users.conf").toFile().exists()) {
 			ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(privateConfigDir.resolve("users.conf")).build();
 			ConfigurationNode rootNode = loader.load();
 			this.users = rootNode.getValue(TypeToken.of(UserSubjectCollection.class), this.users);
+			knownSubjectsMap.put(PermissionService.SUBJECTS_USER, this.getUserSubjects());
+		}
+		
+		File customSubjectsDir = privateConfigDir.resolve("CustomSubjects").toFile();
+		customSubjectsDir.mkdirs();
+		for (File file : customSubjectsDir.listFiles()) {
+			ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(file.toPath()).build();
+			ConfigurationNode rootNode = loader.load();
+			String identifier = rootNode.getNode("identifier").getString();
+			if (identifier!=null) {
+				SimpleSubjectCollection collection = rootNode.getNode("data").getValue(TypeToken.of(SimpleSubjectCollection.class));
+				if (collection!=null) {
+					knownSubjectsMap.put(identifier, collection);
+					customSubjectsMap.put(identifier, collection);
+				}
+			}
 		}
 	}
 	
@@ -187,6 +214,16 @@ public class SimplePermissions implements PermissionService {
 		node = loader.createEmptyNode(ConfigurationOptions.defaults());
 		node.setValue(TypeToken.of(GroupSubjectCollection.class), this.groups);
 		loader.save(node);
+		
+		// other identifiers
+		privateConfigDir.resolve("CustomSubjects").toFile().mkdirs();
+		for (Entry<String,SubjectCollection> e : this.customSubjectsMap.entrySet()) {
+			loader = HoconConfigurationLoader.builder().setPath(privateConfigDir.resolve("CustomSubjects"+File.separator+e.getKey()+".conf")).build();
+			node = loader.createEmptyNode(ConfigurationOptions.defaults());
+			node.getNode("identifier").setValue(e.getKey());
+			node.getNode("data").setValue(TypeToken.of(SimpleSubjectCollection.class), (SimpleSubjectCollection) e.getValue());
+			loader.save(node);
+		}
 	}
 	
 	/**
