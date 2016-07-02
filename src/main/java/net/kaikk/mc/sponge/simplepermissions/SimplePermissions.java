@@ -51,7 +51,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 
-@Plugin(id="simplepermissions", name = "SimplePermissions", version = "0.9.1", description = "A very simple basic permissions plugin")
+@Plugin(id=PluginInfo.id, name = PluginInfo.name, version = PluginInfo.version, description = PluginInfo.description)
 public class SimplePermissions implements PermissionService {
 	private static SimplePermissions instance;
 	
