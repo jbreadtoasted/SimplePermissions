@@ -1,4 +1,4 @@
-package net.kaikk.mc.sponge.ssp.commands;
+package net.kaikk.mc.sponge.simplepermissions.commands;
 
 import java.io.IOException;
 
@@ -12,14 +12,14 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 
-import net.kaikk.mc.sponge.ssp.SimpleSpongePermissions;
-import net.kaikk.mc.sponge.ssp.subject.UserSubject;
+import net.kaikk.mc.sponge.simplepermissions.SimplePermissions;
+import net.kaikk.mc.sponge.simplepermissions.subject.UserSubject;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 public class UserCommand implements CommandExecutor {
-	private SimpleSpongePermissions instance;
+	private SimplePermissions instance;
 	
-	public UserCommand(SimpleSpongePermissions instance) {
+	public UserCommand(SimplePermissions instance) {
 		this.instance = instance;
 	}
 
@@ -38,15 +38,18 @@ public class UserCommand implements CommandExecutor {
 		}
 		
 		String param = args.<String>getOne("param").orElse(null);
-		
-		switch(args.<String>getOne("choice").get()) {
-		case "add": this.add(src, user, param); break;
-		case "remove": this.remove(src, user, param); break;
-		case "addgroup": this.addGroup(src, user, param); break;
-		case "removegroup": this.removeGroup(src, user, param); break;
-		case "setgroup": this.setGroup(src, user, param); break;
-		case "test": this.test(src, user, param); break;
-		default: return CommandResult.empty();
+		try {
+			switch(args.<String>getOne("choice").get()) {
+			case "add": this.add(src, user, param); break;
+			case "remove": this.remove(src, user, param); break;
+			case "addgroup": this.addGroup(src, user, param); break;
+			case "removegroup": this.removeGroup(src, user, param); break;
+			case "setgroup": this.setGroup(src, user, param); break;
+			case "test": this.test(src, user, param); break;
+			default: return CommandResult.empty();
+			}
+		} catch (Throwable e) {
+			throw new CommandException(Text.of(TextColors.RED, "An error occurred: ", e.getMessage()), e);
 		}
 		
 		return CommandResult.success();

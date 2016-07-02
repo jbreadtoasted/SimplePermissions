@@ -1,4 +1,4 @@
-package net.kaikk.mc.sponge.ssp.subject.serializer;
+package net.kaikk.mc.sponge.simplepermissions.subject.serializer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,10 @@ import org.spongepowered.api.util.Tristate;
 
 import com.google.common.reflect.TypeToken;
 
-import net.kaikk.mc.sponge.ssp.SimpleSpongePermissions;
-import net.kaikk.mc.sponge.ssp.subject.GroupSubject;
-import net.kaikk.mc.sponge.ssp.subject.UserSubject;
-import net.kaikk.mc.sponge.ssp.subject.UserSubjectCollection;
+import net.kaikk.mc.sponge.simplepermissions.SimplePermissions;
+import net.kaikk.mc.sponge.simplepermissions.subject.GroupSubject;
+import net.kaikk.mc.sponge.simplepermissions.subject.UserSubject;
+import net.kaikk.mc.sponge.simplepermissions.subject.UserSubjectCollection;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
@@ -81,8 +81,8 @@ public class UserSubjectCollectionSerializer implements TypeSerializer<UserSubje
 			
 			node = userEntry.getValue().getNode("groups");
 			for (String groupName : node.getList(TypeToken.of(String.class))) {
-				if (SimpleSpongePermissions.instance().getGroupSubjects().hasRegistered(groupName)) {
-					subject.getGroups().add((GroupSubject) SimpleSpongePermissions.instance().getGroupSubjects().get(groupName));
+				if (SimplePermissions.instance().getGroupSubjects().hasRegistered(groupName)) {
+					subject.getGroups().add((GroupSubject) SimplePermissions.instance().getGroupSubjects().get(groupName));
 				}
 			}
 		}

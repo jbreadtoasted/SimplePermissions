@@ -1,7 +1,6 @@
-package net.kaikk.mc.sponge.ssp.subject.serializer;
+package net.kaikk.mc.sponge.simplepermissions.subject.serializer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,15 +10,16 @@ import org.spongepowered.api.util.Tristate;
 
 import com.google.common.reflect.TypeToken;
 
-import net.kaikk.mc.sponge.ssp.subject.GroupSubject;
-import net.kaikk.mc.sponge.ssp.subject.GroupSubjectCollection;
+import net.kaikk.mc.sponge.simplepermissions.subject.GroupSubject;
+import net.kaikk.mc.sponge.simplepermissions.subject.SimpleSubject;
+import net.kaikk.mc.sponge.simplepermissions.subject.SimpleSubjectCollection;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 
-public class GroupSubjectCollectionSerializer implements TypeSerializer<GroupSubjectCollection> {
+public class SimpleSubjectCollectionSerializer implements TypeSerializer<SimpleSubjectCollection> {
 	@Override
-	public void serialize(TypeToken<?> type, GroupSubjectCollection obj, ConfigurationNode value) throws ObjectMappingException {
+	public void serialize(TypeToken<?> type, SimpleSubjectCollection obj, ConfigurationNode value) throws ObjectMappingException {
 		for (Subject s : obj.getAllSubjects()) {
 			GroupSubject gs = (GroupSubject) s;
 			List<String> granted = new ArrayList<String>();
@@ -32,7 +32,7 @@ public class GroupSubjectCollectionSerializer implements TypeSerializer<GroupSub
 				}
 			}
 
-			if (granted.isEmpty() && denied.isEmpty() && gs.getParent()==null && gs.getWeight()==0) {
+			if (granted.isEmpty() && denied.isEmpty() && gs.getParent()==null) {
 				value.removeChild(s.getIdentifier());
 			} else {
 				if (!granted.isEmpty()) {
@@ -46,30 +46,17 @@ public class GroupSubjectCollectionSerializer implements TypeSerializer<GroupSub
 				} else {
 					value.getNode(s.getIdentifier()).removeChild("denied");
 				}
-				
-				if (gs.getWeight()!=0) {
-					value.getNode(s.getIdentifier()).getNode("weight").setValue(gs.getWeight());
-				} else {
-					value.getNode(s.getIdentifier()).removeChild("weight");
-				}
-
-				if (gs.getParent()!=null) {
-					value.getNode(s.getIdentifier()).getNode("parent").setValue(gs.getParent().getIdentifier());
-				} else {
-					value.getNode(s.getIdentifier()).removeChild("parent");
-				}
 			}
 		}
 	}
 
 	@Override
-	public GroupSubjectCollection deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-		GroupSubjectCollection collection = new GroupSubjectCollection();
+	public SimpleSubjectCollection deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
+		SimpleSubjectCollection collection = new SimpleSubjectCollection(value.getNode("identifier").getString("undefined"));
 		Map<Object, ? extends ConfigurationNode> users = value.getChildrenMap();
-		Map<GroupSubject, String> parentsMap = new HashMap<GroupSubject, String>();
 		
 		for (Entry<Object, ? extends ConfigurationNode> groupEntry : users.entrySet()) {
-			GroupSubject subject = new GroupSubject(groupEntry.getKey().toString(), collection, groupEntry.getValue().getNode("weight").getInt(0));
+			SimpleSubject subject = new SimpleSubject(groupEntry.getKey().toString(), collection);
 			ConfigurationNode node = groupEntry.getValue().getNode("granted");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, true);
@@ -80,17 +67,6 @@ public class GroupSubjectCollectionSerializer implements TypeSerializer<GroupSub
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, false);
 				collection.transientStorePermission(subject, permission, Tristate.FALSE);
-			}
-			
-			String parent = groupEntry.getValue().getNode("parent").getString();
-			if (parent!=null) {
-				parentsMap.put(subject, parent);
-			}
-		}
-		
-		for (Entry<GroupSubject, String> e : parentsMap.entrySet()) {
-			if (collection.hasRegistered(e.getValue())) {
-				e.getKey().setParent((GroupSubject) collection.get(e.getValue()));
 			}
 		}
 

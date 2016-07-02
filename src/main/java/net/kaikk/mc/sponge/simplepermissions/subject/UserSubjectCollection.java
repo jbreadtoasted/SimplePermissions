@@ -1,4 +1,4 @@
-package net.kaikk.mc.sponge.ssp.subject;
+package net.kaikk.mc.sponge.simplepermissions.subject;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;

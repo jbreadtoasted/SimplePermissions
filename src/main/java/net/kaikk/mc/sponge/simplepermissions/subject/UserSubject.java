@@ -1,8 +1,8 @@
-package net.kaikk.mc.sponge.ssp.subject;
+package net.kaikk.mc.sponge.simplepermissions.subject;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -19,7 +19,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 
 public class UserSubject extends SimpleSubject {
-	private List<GroupSubject> groups = Collections.synchronizedList(new ArrayList<GroupSubject>());
+	private Set<GroupSubject> groups = Collections.synchronizedSet(new HashSet<GroupSubject>());
 	
 	public UserSubject(String identifier, UserSubjectCollection collection) {
 		super(identifier, collection);
@@ -30,7 +30,7 @@ public class UserSubject extends SimpleSubject {
 		return Optional.ofNullable(Sponge.getServer().getPlayer(UUID.fromString(this.getIdentifier())).orElse(null));
 	}
 
-	public List<GroupSubject> getGroups() {
+	public Set<GroupSubject> getGroups() {
 		return groups;
 	}
 	
@@ -59,9 +59,10 @@ public class UserSubject extends SimpleSubject {
 			return Optional.empty();
 		}
 		
-		GroupSubject heaviest = this.groups.get(0);
-		
-		for (GroupSubject g : this.groups) {
+		GroupSubject heaviest = this.groups.iterator().next();
+		Iterator<GroupSubject> it = this.groups.iterator();
+		while (it.hasNext()) {
+			GroupSubject g = it.next();
 			if (g.getWeight()>heaviest.getWeight()) {
 				Boolean b = g.getSubjectData().getPermissions(null).get(permission);
 				if (b!=null) {

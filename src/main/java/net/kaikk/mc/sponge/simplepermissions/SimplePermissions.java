@@ -1,4 +1,4 @@
-package net.kaikk.mc.sponge.ssp;
+package net.kaikk.mc.sponge.simplepermissions;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -29,18 +29,18 @@ import org.spongepowered.api.util.Tristate;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 
-import net.kaikk.mc.sponge.ssp.commands.GroupCommand;
-import net.kaikk.mc.sponge.ssp.commands.GroupsCommand;
-import net.kaikk.mc.sponge.ssp.commands.TestCommand;
-import net.kaikk.mc.sponge.ssp.commands.UserCommand;
-import net.kaikk.mc.sponge.ssp.subject.GroupSubject;
-import net.kaikk.mc.sponge.ssp.subject.GroupSubjectCollection;
-import net.kaikk.mc.sponge.ssp.subject.SimpleSubjectCollection;
-import net.kaikk.mc.sponge.ssp.subject.UserSubject;
-import net.kaikk.mc.sponge.ssp.subject.UserSubjectCollection;
-import net.kaikk.mc.sponge.ssp.subject.serializer.GroupSubjectCollectionSerializer;
-import net.kaikk.mc.sponge.ssp.subject.serializer.SimpleSubjectCollectionSerializer;
-import net.kaikk.mc.sponge.ssp.subject.serializer.UserSubjectCollectionSerializer;
+import net.kaikk.mc.sponge.simplepermissions.commands.GroupCommand;
+import net.kaikk.mc.sponge.simplepermissions.commands.GroupsCommand;
+import net.kaikk.mc.sponge.simplepermissions.commands.TestCommand;
+import net.kaikk.mc.sponge.simplepermissions.commands.UserCommand;
+import net.kaikk.mc.sponge.simplepermissions.subject.GroupSubject;
+import net.kaikk.mc.sponge.simplepermissions.subject.GroupSubjectCollection;
+import net.kaikk.mc.sponge.simplepermissions.subject.SimpleSubjectCollection;
+import net.kaikk.mc.sponge.simplepermissions.subject.UserSubject;
+import net.kaikk.mc.sponge.simplepermissions.subject.UserSubjectCollection;
+import net.kaikk.mc.sponge.simplepermissions.subject.serializer.GroupSubjectCollectionSerializer;
+import net.kaikk.mc.sponge.simplepermissions.subject.serializer.SimpleSubjectCollectionSerializer;
+import net.kaikk.mc.sponge.simplepermissions.subject.serializer.UserSubjectCollectionSerializer;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -49,9 +49,9 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 
-@Plugin(id="simplespongepermissions", name = "SimpleSpongePermissions", version = "0.9.1", description = "A very simple basic permissions plugin")
-public class SimpleSpongePermissions implements PermissionService {
-	private static SimpleSpongePermissions instance;
+@Plugin(id="simplepermissions", name = "SimplePermissions", version = "0.9.1", description = "A very simple basic permissions plugin")
+public class SimplePermissions implements PermissionService {
+	private static SimplePermissions instance;
 	
 	private UserSubjectCollection users = new UserSubjectCollection();
 	private GroupSubjectCollection groups = new GroupSubjectCollection();
@@ -61,7 +61,7 @@ public class SimpleSpongePermissions implements PermissionService {
 	@ConfigDir(sharedRoot = false)
 	private Path privateConfigDir;
 	
-	public SimpleSpongePermissions() {
+	public SimplePermissions() {
 		instance = this;
 		knownSubjectsMap.put(PermissionService.SUBJECTS_USER, this.getUserSubjects());
 		knownSubjectsMap.put(PermissionService.SUBJECTS_GROUP, this.getGroupSubjects());
@@ -193,7 +193,7 @@ public class SimpleSpongePermissions implements PermissionService {
 	 * Instance for SimpleSpongePermissions.
 	 * @return The SimpleSpongePermissions instance
 	 */
-	public static SimpleSpongePermissions instance() {
+	public static SimplePermissions instance() {
 		return instance;
 	}
 	

@@ -1,4 +1,4 @@
-package net.kaikk.mc.sponge.ssp.subject;
+package net.kaikk.mc.sponge.simplepermissions.subject;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
 
-import net.kaikk.mc.sponge.ssp.SimpleSpongePermissions;
+import net.kaikk.mc.sponge.simplepermissions.SimplePermissions;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 public class SimpleSubjectCollection implements SubjectCollection {
@@ -64,14 +64,14 @@ public class SimpleSubjectCollection implements SubjectCollection {
 
 	@Override
 	public Subject getDefaults() {
-		return SimpleSpongePermissions.instance().getDefaults();
+		return SimplePermissions.instance().getDefaults();
 	}
 	
 	public void storePermission(Subject subject, String permission, Tristate value) {
 		this.transientStorePermission(subject, permission, value);
 		
 		try {
-			SimpleSpongePermissions.instance().saveData();
+			SimplePermissions.instance().saveData();
 		} catch (IOException | ObjectMappingException e) {
 			throw new RuntimeException(e);
 		}

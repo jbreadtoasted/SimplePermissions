@@ -1,4 +1,4 @@
-package net.kaikk.mc.sponge.ssp.subject;
+package net.kaikk.mc.sponge.simplepermissions.subject;
 
 import java.util.List;
 import java.util.Map.Entry;
@@ -13,7 +13,7 @@ import org.spongepowered.api.text.Text.Builder;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 
-import net.kaikk.mc.sponge.ssp.SimpleSpongePermissions;
+import net.kaikk.mc.sponge.simplepermissions.SimplePermissions;
 
 public class GroupSubject extends SimpleSubject {
 	private GroupSubject parent;
@@ -53,7 +53,7 @@ public class GroupSubject extends SimpleSubject {
 	
 	@Override
 	public SubjectCollection getContainingCollection() {
-		return SimpleSpongePermissions.instance().getGroupSubjects();
+		return SimplePermissions.instance().getGroupSubjects();
 	}
 
 	public void setParent(GroupSubject parent) {

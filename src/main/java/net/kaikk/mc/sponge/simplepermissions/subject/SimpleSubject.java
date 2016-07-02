@@ -1,4 +1,4 @@
-package net.kaikk.mc.sponge.ssp.subject;
+package net.kaikk.mc.sponge.simplepermissions.subject;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import org.spongepowered.api.text.Text.Builder;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 
-import net.kaikk.mc.sponge.ssp.Utils;
+import net.kaikk.mc.sponge.simplepermissions.Utils;
 
 public class SimpleSubject implements Subject {
 	private String identifier;

@@ -1,4 +1,4 @@
-package net.kaikk.mc.sponge.ssp.commands;
+package net.kaikk.mc.sponge.simplepermissions.commands;
 
 import java.io.IOException;
 
@@ -13,15 +13,15 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 
-import net.kaikk.mc.sponge.ssp.SimpleSpongePermissions;
-import net.kaikk.mc.sponge.ssp.subject.GroupSubject;
-import net.kaikk.mc.sponge.ssp.subject.GroupSubjectCollection;
+import net.kaikk.mc.sponge.simplepermissions.SimplePermissions;
+import net.kaikk.mc.sponge.simplepermissions.subject.GroupSubject;
+import net.kaikk.mc.sponge.simplepermissions.subject.GroupSubjectCollection;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 public class GroupCommand implements CommandExecutor {
-	private SimpleSpongePermissions instance;
+	private SimplePermissions instance;
 	
-	public GroupCommand(SimpleSpongePermissions instance) {
+	public GroupCommand(SimplePermissions instance) {
 		this.instance = instance;
 	}
 	
@@ -46,15 +46,19 @@ public class GroupCommand implements CommandExecutor {
 			return CommandResult.empty();
 		}
 		
-		String param = args.<String>getOne("param").orElse(null);
-		switch(choice) {
-		case "add": this.add(src, group, param); break;
-		case "remove": this.remove(src, group, param); break;
-		case "parent": this.parent(src, group, param); break;
-		case "weight": this.weight(src, group, args.<Integer>getOne("weight").orElse(null)); break;
-		case "test": this.test(src, group, param); break;
-		case "delete": this.delete(src, group); break;
-		default: return CommandResult.empty();
+		try {
+			String param = args.<String>getOne("param").orElse(null);
+			switch(choice) {
+			case "add": this.add(src, group, param); break;
+			case "remove": this.remove(src, group, param); break;
+			case "parent": this.parent(src, group, param); break;
+			case "weight": this.weight(src, group, args.<Integer>getOne("weight").orElse(null)); break;
+			case "test": this.test(src, group, param); break;
+			case "delete": this.delete(src, group); break;
+			default: return CommandResult.empty();
+			}
+		} catch (Throwable e) {
+			throw new CommandException(Text.of(TextColors.RED, "An error occurred: ", e.getMessage()), e);
 		}
 		
 		return CommandResult.success();
@@ -148,12 +152,13 @@ public class GroupCommand implements CommandExecutor {
 		src.sendMessage(Text.of(TextColors.AQUA, "Group ", TextColors.GOLD, group.getIdentifier(), TextColors.AQUA, " created"));
 	}
 	
-	private void delete(CommandSource src, GroupSubject group) {
+	private void delete(CommandSource src, GroupSubject group) throws IOException, ObjectMappingException {
 		if (group.getIdentifier().equalsIgnoreCase("default")) {
 			src.sendMessage(Text.of(TextColors.RED, "The default group cannot be deleted."));
 			return;
 		}
 		((GroupSubjectCollection) instance.getGroupSubjects()).remove(group);
+		instance.saveData();
 		src.sendMessage(Text.of(TextColors.AQUA, "Group ", TextColors.GOLD, group.getIdentifier(), TextColors.AQUA, " deleted"));
 	}
 }

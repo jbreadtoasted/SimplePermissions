@@ -1,4 +1,4 @@
-package net.kaikk.mc.sponge.ssp;
+package net.kaikk.mc.sponge.simplepermissions;
 
 import java.util.ArrayList;
 import java.util.Iterator;
