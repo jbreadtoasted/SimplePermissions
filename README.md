@@ -1,5 +1,5 @@
-# SimpleSpongePermissions
-This is a very easy and basic permissions plugin for Sponge API 5. <a href='https://forums.spongepowered.org/t/simplespongepermissions-api-5/'>Sponge page</a>
+# SimplePermissions
+This is a very easy and basic permissions plugin for Sponge API 5. <a href='https://forums.spongepowered.org/t/simplepermissions-api-5/'>Sponge page</a>
 
 ## Download
 All builds for my plugins can be found at this link: http://kaikk.net/mc/
