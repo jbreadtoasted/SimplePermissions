@@ -20,16 +20,18 @@ import org.spongepowered.api.util.Tristate;
 
 import net.kaikk.mc.sponge.simplepermissions.Utils;
 
-public class SimpleSubject implements Subject {
-	private String identifier;
-	private SimpleSubjectCollection collection; 
-	private SimpleSubjectData permissionData = new SimpleSubjectData();
+public class SimpleSubject implements Subject, SubjectData {
+	private final String identifier;
+	private final SimpleSubjectCollection collection; 
+	private final Map<String,Boolean> permissions = new HashMap<String,Boolean>();
+	private final Map<Set<Context>, Map<String, Boolean>> map = new HashMap<Set<Context>, Map<String, Boolean>>();
 
 	public SimpleSubject(String identifier, SimpleSubjectCollection collection) {
 		this.identifier = identifier;
 		this.collection = collection;
+		map.put(GLOBAL_CONTEXT, permissions);
 	}
-
+	
 	@Override
 	public String getIdentifier() {
 		return identifier;
@@ -52,12 +54,12 @@ public class SimpleSubject implements Subject {
 
 	@Override
 	public SubjectData getSubjectData() {
-		return permissionData;
+		return this;
 	}
 
 	@Override
 	public SubjectData getTransientSubjectData() {
-		return permissionData;
+		return this;
 	}
 
 	@Override
@@ -67,16 +69,16 @@ public class SimpleSubject implements Subject {
 
 	@Override
 	public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-		Boolean b = permissionData.getPermissions().get(permission);
+		Boolean b = this.permissions.get(permission);
 		if (b==null) {
-			b = permissionData.getPermissions().get("*");
+			b = this.permissions.get("*");
 			if (b==null) {
 				String[] split = permission.split("[.]");
 				StringBuilder pb = new StringBuilder();
 				for(int i=0; i<split.length-1; i++) {
 					pb.append(split[i]);
 					pb.append('.');
-					b = permissionData.getPermissions().get(pb.toString()+"*");
+					b = this.permissions.get(pb.toString()+"*");
 					if (b!=null) {
 						break;
 					}
@@ -96,92 +98,10 @@ public class SimpleSubject implements Subject {
 	}
 
 	@Override
-	public List<Subject> getParents(Set<Context> contexts) {
-		return Collections.emptyList();
-	}
-
-	@Override
 	public String toString() {
 		return "SimpleSubject [identifier=" + identifier + "]";
 	}
 	
-	public class SimpleSubjectData implements SubjectData {
-		private Map<String,Boolean> permissions = new HashMap<String,Boolean>();
-		private Map<Set<Context>, Map<String, Boolean>> map = new HashMap<Set<Context>, Map<String, Boolean>>();
-		
-		SimpleSubjectData() {
-			map.put(GLOBAL_CONTEXT, permissions);
-		}
-		
-		@Override
-		public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
-			return map;
-		}
-
-		@Override
-		public Map<String, Boolean> getPermissions(Set<Context> contexts) {
-			return permissions;
-		}
-
-		@Override
-		public boolean setPermission(Set<Context> contexts, String permission, Tristate value) {
-			if (value==Tristate.UNDEFINED) {
-				permissions.remove(permission);
-			} else {
-				permissions.put(permission, value == Tristate.TRUE);
-			}
-			
-			((SimpleSubjectCollection) SimpleSubject.this.getContainingCollection()).storePermission(SimpleSubject.this, permission, value);
-			return true;
-		}
-
-		@Override
-		public boolean clearPermissions() {
-			permissions.clear();
-			return true;
-		}
-
-		@Override
-		public boolean clearPermissions(Set<Context> contexts) {
-			permissions.clear();
-			return true;
-		}
-
-		@Override
-		public Map<Set<Context>, List<Subject>> getAllParents() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public List<Subject> getParents(Set<Context> contexts) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean addParent(Set<Context> contexts, Subject parent) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean removeParent(Set<Context> contexts, Subject parent) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean clearParents() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean clearParents(Set<Context> contexts) {
-			throw new UnsupportedOperationException();
-		}
-
-		public Map<String, Boolean> getPermissions() {
-			return permissions;
-		}
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -214,12 +134,107 @@ public class SimpleSubject implements Subject {
 	
 	public Text info() {
 		Builder b = Text.builder();
-		b.append(Text.of(TextColors.GREEN, "-- SimpleSpongePermissions - ", TextColors.GOLD, this.getContainingCollection().getIdentifier(), " : ", this.getIdentifier(), TextColors.GREEN, " --", Text.NEW_LINE));
+		b.append(Text.of(TextColors.GREEN, "-- SimplePermissions - ", TextColors.GOLD, this.getContainingCollection().getIdentifier(), " : ", this.getIdentifier(), TextColors.GREEN, " --", Text.NEW_LINE));
 		b.append(Text.of(TextColors.GREEN, "Permissions:", Text.NEW_LINE));
 		for(Entry<String,Boolean> e : this.getSubjectData().getPermissions(null).entrySet()) {
 			b.append(e.getValue() ? Text.of(TextColors.GREEN, "+ ") : Text.of(TextColors.RED, "- "), Text.of(TextColors.AQUA, e.getKey()), Text.NEW_LINE);
 		}
 		
 		return b.build();
+	}
+
+
+	@Override
+	public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
+		return map;
+	}
+
+	@Override
+	public Map<String, Boolean> getPermissions(Set<Context> contexts) {
+		return permissions;
+	}
+
+	@Override
+	public boolean setPermission(Set<Context> contexts, String permission, Tristate value) {
+		if (value==Tristate.UNDEFINED) {
+			permissions.remove(permission);
+		} else {
+			permissions.put(permission, value == Tristate.TRUE);
+		}
+		
+		((SimpleSubjectCollection) this.getContainingCollection()).storePermission(this, permission, value);
+		return true;
+	}
+
+	@Override
+	public boolean clearPermissions() {
+		permissions.clear();
+		return true;
+	}
+
+	@Override
+	public boolean clearPermissions(Set<Context> contexts) {
+		permissions.clear();
+		return true;
+	}
+
+	@Override
+	public Map<Set<Context>, List<Subject>> getAllParents() {
+		return Collections.emptyMap();// TODO
+	}
+
+	@Override
+	public List<Subject> getParents(Set<Context> contexts) {
+		return Collections.emptyList();// TODO
+	}
+
+	@Override
+	public boolean addParent(Set<Context> contexts, Subject parent) {
+		return false;// TODO
+	}
+
+	@Override
+	public boolean removeParent(Set<Context> contexts, Subject parent) {
+		return false;// TODO
+	}
+
+	@Override
+	public boolean clearParents() {
+		return false;// TODO
+	}
+
+	@Override
+	public boolean clearParents(Set<Context> contexts) {
+		return false;// TODO
+	}
+
+	@Override
+	public Map<Set<Context>, Map<String, String>> getAllOptions() {
+		return Collections.emptyMap(); // TODO
+	}
+
+	@Override
+	public Map<String, String> getOptions(Set<Context> contexts) {
+		return Collections.emptyMap(); // TODO
+	}
+
+	@Override
+	public boolean setOption(Set<Context> contexts, String key, String value) {
+		return false;
+	}
+
+	@Override
+	public boolean clearOptions(Set<Context> contexts) {
+		return false;
+	}
+
+	@Override
+	public boolean clearOptions() {
+		return false;
+	}
+
+	@Override
+	public Optional<String> getOption(Set<Context> contexts, String key) {
+		return Optional.empty();
 	}
 }

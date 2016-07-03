@@ -1,6 +1,8 @@
 package net.kaikk.mc.sponge.simplepermissions.subject;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -12,6 +14,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Text.Builder;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
+
+import com.google.common.collect.Lists;
 
 import net.kaikk.mc.sponge.simplepermissions.SimplePermissions;
 
@@ -48,7 +52,7 @@ public class GroupSubject extends SimpleSubject {
 	
 	@Override
 	public List<Subject> getParents(Set<Context> contexts) {
-		throw new UnsupportedOperationException("To be implemented");
+		return Lists.newArrayList(this.parent);
 	}
 	
 	@Override
@@ -109,7 +113,7 @@ public class GroupSubject extends SimpleSubject {
 	@Override
 	public Text info() {
 		Builder b = Text.builder();
-		b.append(Text.of(TextColors.GREEN, "-- SimpleSpongePermissions - Group ", TextColors.GOLD, this.getIdentifier(), TextColors.GREEN, " --", Text.NEW_LINE));
+		b.append(Text.of(TextColors.GREEN, "-- SimplePermissions - Group ", TextColors.GOLD, this.getIdentifier(), TextColors.GREEN, " --", Text.NEW_LINE));
 		
 		if (this.parent!=null) {
 			b.append(Text.of(TextColors.GREEN, "Parent: ", TextColors.AQUA, this.parent.getIdentifier(), Text.NEW_LINE));
@@ -125,6 +129,13 @@ public class GroupSubject extends SimpleSubject {
 		}
 		
 		return b.build();
+	}
+	
+	@Override
+	public Map<Set<Context>, List<Subject>> getAllParents() {
+		Map<Set<Context>, List<Subject>> map = new HashMap<Set<Context>, List<Subject>>();
+		map.put(null, this.getParents());
+		return map;
 	}
 	
 	public boolean parentCheck(GroupSubject other) {

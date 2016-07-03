@@ -1,8 +1,11 @@
 package net.kaikk.mc.sponge.simplepermissions.subject;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -19,7 +22,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 
 public class UserSubject extends SimpleSubject {
-	private Set<GroupSubject> groups = Collections.synchronizedSet(new HashSet<GroupSubject>());
+	private List<GroupSubject> groups = Collections.synchronizedList(new ArrayList<GroupSubject>());
 	
 	public UserSubject(String identifier, UserSubjectCollection collection) {
 		super(identifier, collection);
@@ -28,10 +31,6 @@ public class UserSubject extends SimpleSubject {
 	@Override
 	public Optional<CommandSource> getCommandSource() {
 		return Optional.ofNullable(Sponge.getServer().getPlayer(UUID.fromString(this.getIdentifier())).orElse(null));
-	}
-
-	public Set<GroupSubject> getGroups() {
-		return groups;
 	}
 	
 	@Override
@@ -83,7 +82,7 @@ public class UserSubject extends SimpleSubject {
 		Builder b = Text.builder();
 		Optional<GameProfile> profile = Sponge.getServer().getGameProfileManager().getCache().getById(UUID.fromString(this.getIdentifier()));
 		String name = profile.isPresent() && profile.get().getName().isPresent() ? profile.get().getName().get() : this.getIdentifier();
-		b.append(Text.of(TextColors.GREEN, "-- SimpleSpongePermissions - ", TextColors.GOLD, name, TextColors.GREEN, " --", Text.NEW_LINE));
+		b.append(Text.of(TextColors.GREEN, "-- SimplePermissions - ", TextColors.GOLD, name, TextColors.GREEN, " --", Text.NEW_LINE));
 		
 		if (!this.getGroups().isEmpty()) {
 			StringBuilder sb = new StringBuilder();
@@ -100,5 +99,21 @@ public class UserSubject extends SimpleSubject {
 		}
 		
 		return b.build();
+	}
+
+	public List<GroupSubject> getGroups() {
+		return groups;
+	}
+	
+	@Override
+	public List<Subject> getParents(Set<Context> contexts) {
+		return Collections.unmodifiableList(this.groups);
+	}
+	
+	@Override
+	public Map<Set<Context>, List<Subject>> getAllParents() {
+		Map<Set<Context>, List<Subject>> map = new HashMap<Set<Context>, List<Subject>>();
+		map.put(null, this.getParents());
+		return map;
 	}
 }
