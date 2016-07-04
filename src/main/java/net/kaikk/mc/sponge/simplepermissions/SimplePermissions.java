@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -63,6 +64,9 @@ public class SimplePermissions implements PermissionService {
 	@Inject
 	@ConfigDir(sharedRoot = false)
 	private Path privateConfigDir;
+	
+	@Inject
+	private Logger logger;
 	
 	@Listener
 	public void onServerInitialize(GameInitializationEvent event) throws Exception {
@@ -336,5 +340,9 @@ public class SimplePermissions implements PermissionService {
 		us.getGroups().remove(gs);
 		this.saveData();
 		return true;
+	}
+
+	public Logger logger() {
+		return logger;
 	}
 }
