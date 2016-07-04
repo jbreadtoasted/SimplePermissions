@@ -17,7 +17,7 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -64,14 +64,13 @@ public class SimplePermissions implements PermissionService {
 	@ConfigDir(sharedRoot = false)
 	private Path privateConfigDir;
 	
-	public SimplePermissions() {
+	@Listener
+	public void onServerInitialize(GameInitializationEvent event) throws Exception {
 		instance = this;
+
 		knownSubjectsMap.put(PermissionService.SUBJECTS_USER, this.getUserSubjects());
 		knownSubjectsMap.put(PermissionService.SUBJECTS_GROUP, this.getGroupSubjects());
-	}
-	
-	@Listener
-	public void onServerStart(GameStartedServerEvent event) throws Exception {
+		
 		// register serializers
 		TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(SimpleSubjectCollection.class), new SimpleSubjectCollectionSerializer());
 		TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(UserSubjectCollection.class), new UserSubjectCollectionSerializer());
@@ -82,6 +81,7 @@ public class SimplePermissions implements PermissionService {
 		
 		// register permission service
 		Sponge.getServiceManager().setProvider(this, PermissionService.class, this);
+		
 		
 		// register commands
 		Sponge.getCommandManager().register(this, CommandSpec.builder()
