@@ -11,9 +11,10 @@ public class UserSubjectCollection extends SimpleSubjectCollection {
 	@Override
 	public Subject get(String identifier) {
 		Subject s = this.identifiersToSubject.get(identifier);
-		if (s!=null) {
-			return s;
+		if (s==null) {
+			s = new UserSubject(identifier, this);
+			this.identifiersToSubject.put(identifier, s);
 		}
-		return new UserSubject(identifier, this);
+		return s;
 	}
 }

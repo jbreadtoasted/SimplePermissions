@@ -11,9 +11,10 @@ public class GroupSubjectCollection extends SimpleSubjectCollection {
 	@Override
 	public Subject get(String identifier) {
 		Subject s = this.identifiersToSubject.get(identifier.toLowerCase());
-		if (s!=null) {
-			return s;
+		if (s==null) {
+			s = new GroupSubject(identifier, this);
+			this.identifiersToSubject.put(identifier, s);
 		}
-		return new GroupSubject(identifier, this);
+		return s;
 	}
 }

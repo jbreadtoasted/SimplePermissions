@@ -35,10 +35,11 @@ public class SimpleSubjectCollection implements SubjectCollection {
 	@Override
 	public Subject get(String identifier) {
 		Subject s = this.identifiersToSubject.get(identifier);
-		if (s!=null) {
-			return s;
+		if (s==null) {
+			s = new SimpleSubject(identifier, this);
+			this.identifiersToSubject.put(identifier, s);
 		}
-		return new SimpleSubject(identifier, this);
+		return s;
 	}
 
 	@Override
