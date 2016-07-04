@@ -122,4 +122,8 @@ public class SimpleSubjectCollection implements SubjectCollection {
 			}
 		}
 	}
+	
+	public int size() {
+		return this.identifiersToSubject.size();
+	}
 }

@@ -181,6 +181,7 @@ public class SimplePermissions implements PermissionService {
 			GroupSubjectCollection groups = rootNode.getValue(TypeToken.of(GroupSubjectCollection.class));
 			if (groups!=null) {
 				this.groups = groups;
+				logger.info("Loaded "+groups.size()+" groups");
 			} else {
 				logger.warn("Couldn't read groups permission file");
 			}
@@ -193,6 +194,7 @@ public class SimplePermissions implements PermissionService {
 			UserSubjectCollection users = rootNode.getValue(TypeToken.of(UserSubjectCollection.class));
 			if (users!=null) {
 				this.users = users;
+				logger.info("Loaded "+users.size()+" users");
 			} else {
 				logger.warn("Couldn't read users permission file");
 			}
@@ -210,6 +212,7 @@ public class SimplePermissions implements PermissionService {
 				if (collection!=null) {
 					knownSubjectsMap.put(identifier, collection);
 					customSubjectsMap.put(identifier, collection);
+					logger.info("Loaded "+collection.size()+" "+identifier);
 				} else {
 					logger.warn("Couldn't read "+identifier+" permission file");
 				}
