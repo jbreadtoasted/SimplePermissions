@@ -150,7 +150,7 @@ public class GroupCommand implements CommandExecutor {
 		}
 		
 		GroupSubject group = (GroupSubject) instance.getGroupSubjects().get(groupName);
-		((GroupSubjectCollection) instance.getGroupSubjects()).storePermission(group, "", Tristate.UNDEFINED);
+		((GroupSubjectCollection) instance.getGroupSubjects()).add(group);
 		src.sendMessage(Text.of(TextColors.AQUA, "Group ", TextColors.GOLD, group.getIdentifier(), TextColors.AQUA, " created"));
 	}
 	
