@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
 
 import com.google.common.reflect.TypeToken;
 
@@ -73,19 +72,19 @@ public class GroupSubjectCollectionSerializer implements TypeSerializer<GroupSub
 			ConfigurationNode node = groupEntry.getValue().getNode("granted");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, true);
-				collection.transientStorePermission(subject, permission, Tristate.TRUE);
 			}
 			
 			node = groupEntry.getValue().getNode("denied");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, false);
-				collection.transientStorePermission(subject, permission, Tristate.FALSE);
 			}
 			
 			String parent = groupEntry.getValue().getNode("parent").getString();
 			if (parent!=null) {
 				parentsMap.put(subject, parent);
 			}
+			
+			collection.add(subject);
 		}
 		
 		for (Entry<GroupSubject, String> e : parentsMap.entrySet()) {

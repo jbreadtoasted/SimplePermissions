@@ -178,14 +178,24 @@ public class SimplePermissions implements PermissionService {
 		if (privateConfigDir.resolve("groups.conf").toFile().exists()) {
 			ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(privateConfigDir.resolve("groups.conf")).build();
 			ConfigurationNode rootNode = loader.load();
-			this.groups = rootNode.getValue(TypeToken.of(GroupSubjectCollection.class), this.groups);
+			GroupSubjectCollection groups = rootNode.getValue(TypeToken.of(GroupSubjectCollection.class));
+			if (groups!=null) {
+				this.groups = groups;
+			} else {
+				logger.warn("Couldn't read groups permission file");
+			}
 			knownSubjectsMap.put(PermissionService.SUBJECTS_GROUP, this.getGroupSubjects());
 		}
 		
 		if (privateConfigDir.resolve("users.conf").toFile().exists()) {
 			ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(privateConfigDir.resolve("users.conf")).build();
 			ConfigurationNode rootNode = loader.load();
-			this.users = rootNode.getValue(TypeToken.of(UserSubjectCollection.class), this.users);
+			UserSubjectCollection users = rootNode.getValue(TypeToken.of(UserSubjectCollection.class));
+			if (users!=null) {
+				this.users = users;
+			} else {
+				logger.warn("Couldn't read users permission file");
+			}
 			knownSubjectsMap.put(PermissionService.SUBJECTS_USER, this.getUserSubjects());
 		}
 		
@@ -200,7 +210,11 @@ public class SimplePermissions implements PermissionService {
 				if (collection!=null) {
 					knownSubjectsMap.put(identifier, collection);
 					customSubjectsMap.put(identifier, collection);
+				} else {
+					logger.warn("Couldn't read "+identifier+" permission file");
 				}
+			} else {
+				logger.warn("Couldn't read "+file.getName()+" permission file");
 			}
 		}
 	}

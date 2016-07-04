@@ -45,21 +45,22 @@ public class UserSubject extends SimpleSubject {
 			return tristate;
 		}
 		
-		Optional<GroupSubject> group = this.getHeaviestGroupFor(permission);
-		if (group.isPresent()) {
-			return group.get().getPermissionValue(null, permission);
+		tristate = this.getPermissionFromHeaviestGroupFor(permission);
+		if (tristate!=Tristate.UNDEFINED) {
+			return tristate;
 		}
 		
 		return this.getDefaultPermissionValue(permission);
 	}
 	
-	public Optional<GroupSubject> getHeaviestGroupFor(String permission) {
+	public Tristate getPermissionFromHeaviestGroupFor(String permission) {
 		if (this.groups.isEmpty()) {
-			return Optional.empty();
+			return Tristate.UNDEFINED;
 		}
 		
-		GroupSubject heaviest = this.groups.iterator().next();
 		Iterator<GroupSubject> it = this.groups.iterator();
+		GroupSubject heaviest = it.next();
+		
 		while (it.hasNext()) {
 			GroupSubject g = it.next();
 			if (g.getWeight()>heaviest.getWeight()) {
@@ -70,11 +71,7 @@ public class UserSubject extends SimpleSubject {
 			}
 		}
 		
-		Boolean b = heaviest.getSubjectData().getPermissions(null).get(permission);
-		if (b!=null) {
-			return Optional.of(heaviest);
-		}
-		return Optional.empty();
+		return heaviest.getPermissionValue(null, permission);
 	}
 	
 	@Override

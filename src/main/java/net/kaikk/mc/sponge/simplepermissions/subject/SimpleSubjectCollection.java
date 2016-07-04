@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.spongepowered.api.service.context.Context;
@@ -106,6 +107,14 @@ public class SimpleSubjectCollection implements SubjectCollection {
 	public void remove(Subject subject) {
 		for (String permission : subject.getSubjectData().getPermissions(null).keySet()) {
 			this.grantedPermissionsToSubjects.get(permission).remove(subject);
+		}
+	}
+	
+	public void add(SimpleSubject subject) {
+		if (this.identifiersToSubject.putIfAbsent(subject.getIdentifier(), subject)==null) {
+			for (Entry<String, Boolean> permission : subject.getSubjectData().getPermissions(null).entrySet()) {
+				this.grantedPermissionsToSubjects.get(permission.getKey()).put(subject, permission.getValue());
+			}
 		}
 	}
 }

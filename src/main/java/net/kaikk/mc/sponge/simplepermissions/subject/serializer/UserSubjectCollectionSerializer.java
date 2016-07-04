@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
 
 import com.google.common.reflect.TypeToken;
 
@@ -70,13 +69,11 @@ public class UserSubjectCollectionSerializer implements TypeSerializer<UserSubje
 			ConfigurationNode node = userEntry.getValue().getNode("granted");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, true);
-				collection.transientStorePermission(subject, permission, Tristate.TRUE);
 			}
 			
 			node = userEntry.getValue().getNode("denied");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, false);
-				collection.transientStorePermission(subject, permission, Tristate.FALSE);
 			}
 			
 			node = userEntry.getValue().getNode("groups");
@@ -85,6 +82,8 @@ public class UserSubjectCollectionSerializer implements TypeSerializer<UserSubje
 					subject.getGroups().add((GroupSubject) SimplePermissions.instance().getGroupSubjects().get(groupName));
 				}
 			}
+			
+			collection.add(subject);
 		}
 
 		return collection;

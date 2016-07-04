@@ -28,22 +28,23 @@ public class GroupCommand implements CommandExecutor {
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 		String groupName = args.<String>getOne("group").get();
-		GroupSubject group = (GroupSubject) instance.getGroupSubjects().get(groupName);
 		
-		if (!args.<String>getOne("choice").isPresent()) {
-			this.groupInfo(src, group);
-			return CommandResult.success();
-		}
-		
-		String choice = args.<String>getOne("choice").get();
-		if (choice.equals("create")) {
-			this.create(src, group);
+		String choice = args.<String>getOne("choice").orElse(null);
+		if (choice!=null && choice.equals("create")) {
+			this.create(src, groupName);
 			return CommandResult.success();
 		}
 		
 		if (!instance.getGroupSubjects().hasRegistered(groupName) && !groupName.equals("default")) {
 			src.sendMessage(Text.of(TextColors.RED, "Invalid group"));
 			return CommandResult.empty();
+		}
+		
+		GroupSubject group = (GroupSubject) instance.getGroupSubjects().get(groupName);
+		
+		if (choice==null) {
+			this.groupInfo(src, group);
+			return CommandResult.success();
 		}
 		
 		try {
@@ -142,12 +143,13 @@ public class GroupCommand implements CommandExecutor {
 		src.sendMessage(Text.of(TextColors.AQUA,  "Group ", TextColors.GOLD, group.getIdentifier(), TextColors.AQUA, " permission ", permission, " value is ", TextColors.GOLD, group.getPermissionValue(null, permission)));
 	}
 
-	private void create(CommandSource src, GroupSubject group) {
-		if (instance.getGroupSubjects().hasRegistered(group.getIdentifier())) {
+	private void create(CommandSource src, String groupName) {
+		if (instance.getGroupSubjects().hasRegistered(groupName)) {
 			src.sendMessage(Text.of(TextColors.RED, "This group already exists!"));
 			return;
 		}
 		
+		GroupSubject group = (GroupSubject) instance.getGroupSubjects().get(groupName);
 		((GroupSubjectCollection) instance.getGroupSubjects()).storePermission(group, "", Tristate.UNDEFINED);
 		src.sendMessage(Text.of(TextColors.AQUA, "Group ", TextColors.GOLD, group.getIdentifier(), TextColors.AQUA, " created"));
 	}
