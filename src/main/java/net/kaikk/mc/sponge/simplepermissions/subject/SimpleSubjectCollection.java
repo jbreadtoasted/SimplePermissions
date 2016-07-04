@@ -113,7 +113,12 @@ public class SimpleSubjectCollection implements SubjectCollection {
 	public void add(SimpleSubject subject) {
 		if (this.identifiersToSubject.putIfAbsent(subject.getIdentifier(), subject)==null) {
 			for (Entry<String, Boolean> permission : subject.getSubjectData().getPermissions(null).entrySet()) {
-				this.grantedPermissionsToSubjects.get(permission.getKey()).put(subject, permission.getValue());
+				Map<Subject,Boolean> map = this.grantedPermissionsToSubjects.get(permission.getKey());
+				if (map==null) {
+					map = new HashMap<Subject,Boolean>();
+					this.grantedPermissionsToSubjects.put(permission.getKey(), map);
+				}
+				map.put(subject, permission.getValue());
 			}
 		}
 	}
