@@ -89,7 +89,7 @@ public class SimpleSubject implements Subject, SubjectData {
 	}
 
 	public Tristate getDefaultPermissionValue(String permission) {
-		return this.getContainingCollection().getDefaults().getPermissionValue(null, permission);
+		return ((SimpleSubjectCollection) this.getContainingCollection()).getDefaults().getPermissionValue(null, permission);
 	}
 
 	@Override
@@ -208,32 +208,32 @@ public class SimpleSubject implements Subject, SubjectData {
 		return false;// TODO
 	}
 
-	@Override
+	// SpongeAPI 5 Override
 	public Map<Set<Context>, Map<String, String>> getAllOptions() {
 		return Collections.emptyMap(); // TODO
 	}
 
-	@Override
+	// SpongeAPI 5 Override
 	public Map<String, String> getOptions(Set<Context> contexts) {
 		return Collections.emptyMap(); // TODO
 	}
 
-	@Override
+	// SpongeAPI 5 Override
 	public boolean setOption(Set<Context> contexts, String key, String value) {
 		return false;
 	}
 
-	@Override
+	// SpongeAPI 5 Override
 	public boolean clearOptions(Set<Context> contexts) {
 		return false;
 	}
 
-	@Override
+	// SpongeAPI 5 Override
 	public boolean clearOptions() {
 		return false;
 	}
 
-	@Override
+	// SpongeAPI 5 Override
 	public Optional<String> getOption(Set<Context> contexts, String key) {
 		return Optional.empty();
 	}

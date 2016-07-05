@@ -64,7 +64,7 @@ public class SimpleSubjectCollection implements SubjectCollection {
 		return this.getAllWithPermission(permission);
 	}
 
-	@Override
+	// SpongeAPI 5 Override
 	public Subject getDefaults() {
 		return SimplePermissions.instance().getDefaults();
 	}

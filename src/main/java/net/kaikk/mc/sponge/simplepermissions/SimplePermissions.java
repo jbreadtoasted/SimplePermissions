@@ -26,6 +26,7 @@ import org.spongepowered.api.service.permission.PermissionDescription.Builder;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
+import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tristate;
 
@@ -130,8 +131,13 @@ public class SimplePermissions implements PermissionService {
 	public SubjectCollection getGroupSubjects() {
 		return groups;
 	}
+	
+	// SpongeAPI 4 Override
+	public SubjectData getDefaultData() {
+		return groups.get("default").getSubjectData();
+	}
 
-	@Override
+	// SpongeAPI 5 Override
 	public Subject getDefaults() {
 		return groups.get("default");
 	}
