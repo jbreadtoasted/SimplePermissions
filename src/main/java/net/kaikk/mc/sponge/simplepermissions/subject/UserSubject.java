@@ -58,6 +58,8 @@ public class UserSubject extends SimpleSubject {
 			return Tristate.UNDEFINED;
 		}
 		
+		permission = permission.toLowerCase();
+		
 		Iterator<GroupSubject> it = this.groups.iterator();
 		GroupSubject heaviest = it.next();
 		
@@ -67,6 +69,14 @@ public class UserSubject extends SimpleSubject {
 				Boolean b = g.getSubjectData().getPermissions(null).get(permission);
 				if (b!=null) {
 					heaviest = g;
+				}
+			}
+			
+			Optional<GroupSubject> heaviestParentGroup = g.getHeaviestParentGroupFor(permission);
+			if (heaviestParentGroup.isPresent() && heaviestParentGroup.get().getWeight()>heaviest.getWeight()) {
+				Boolean b = heaviestParentGroup.get().getSubjectData().getPermissions(null).get(permission);
+				if (b!=null) {
+					heaviest = heaviestParentGroup.get();
 				}
 			}
 		}

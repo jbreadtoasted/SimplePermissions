@@ -69,6 +69,7 @@ public class SimpleSubject implements Subject, SubjectData {
 
 	@Override
 	public Tristate getPermissionValue(Set<Context> contexts, String permission) {
+		permission = permission.toLowerCase();
 		Boolean b = this.permissions.get(permission);
 		if (b==null) {
 			b = this.permissions.get("*");
@@ -156,6 +157,7 @@ public class SimpleSubject implements Subject, SubjectData {
 
 	@Override
 	public boolean setPermission(Set<Context> contexts, String permission, Tristate value) {
+		permission = permission.toLowerCase();
 		if (value==Tristate.UNDEFINED) {
 			permissions.remove(permission);
 		} else {
