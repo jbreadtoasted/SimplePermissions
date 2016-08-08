@@ -9,7 +9,6 @@ import org.spongepowered.api.service.permission.Subject;
 
 import com.google.common.reflect.TypeToken;
 
-import net.kaikk.mc.sponge.simplepermissions.subject.GroupSubject;
 import net.kaikk.mc.sponge.simplepermissions.subject.SimpleSubject;
 import net.kaikk.mc.sponge.simplepermissions.subject.SimpleSubjectCollection;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -20,7 +19,6 @@ public class SimpleSubjectCollectionSerializer implements TypeSerializer<SimpleS
 	@Override
 	public void serialize(TypeToken<?> type, SimpleSubjectCollection obj, ConfigurationNode value) throws ObjectMappingException {
 		for (Subject s : obj.getAllSubjects()) {
-			GroupSubject gs = (GroupSubject) s;
 			List<String> granted = new ArrayList<String>();
 			List<String> denied = new ArrayList<String>();
 			for (Entry<String,Boolean> e : s.getSubjectData().getPermissions(null).entrySet()) {
@@ -31,7 +29,7 @@ public class SimpleSubjectCollectionSerializer implements TypeSerializer<SimpleS
 				}
 			}
 
-			if (granted.isEmpty() && denied.isEmpty() && gs.getParent()==null) {
+			if (granted.isEmpty() && denied.isEmpty()) {
 				value.removeChild(s.getIdentifier());
 			} else {
 				if (!granted.isEmpty()) {
