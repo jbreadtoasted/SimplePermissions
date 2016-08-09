@@ -84,11 +84,11 @@ public class GroupSubject extends SimpleSubject {
 	}
 	
 	public Tristate getDefaultPermissionValue(String permission) {
-		if (this.equals(((SimplePermissions) this.getContainingCollection()).getDefaults())) {
+		if (this.equals(this.getContainingCollection().getDefaults())) {
 			return Tristate.UNDEFINED;
 		}
 		
-		return ((SimplePermissions) this.getContainingCollection()).getDefaults().getPermissionValue(null, permission);
+		return this.getContainingCollection().getDefaults().getPermissionValue(null, permission);
 	}
 	
 	public Optional<GroupSubject> getHeaviestParentGroupFor(String permission) {
