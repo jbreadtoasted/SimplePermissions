@@ -90,24 +90,24 @@ public class SimplePermissions implements PermissionService {
 		
 		// register commands
 		Sponge.getCommandManager().register(this, CommandSpec.builder()
-				.description(Text.of("SimpleSpongePermissions User Command"))
+				.description(Text.of("SimplePermissions User Command"))
 				.arguments(GenericArguments.user(Text.of("user")), GenericArguments.optional(Utils.buildChoices("choice", "add", "remove", "setgroup", "addgroup", "removegroup", "test")), GenericArguments.optional(GenericArguments.string(Text.of("param"))))
 				.permission("simplepermissions.manage")
 				.executor(new UserCommand(this)).build(), "puser");
 		
 		Sponge.getCommandManager().register(this, CommandSpec.builder()
-				.description(Text.of("SimpleSpongePermissions Group Command"))
+				.description(Text.of("SimplePermissions Group Command"))
 				.arguments(GenericArguments.string(Text.of("group")), GenericArguments.optional(Utils.buildChoices("choice", "create", "delete", "add", "remove", "parent", "weight", "test")), GenericArguments.optionalWeak(GenericArguments.integer(Text.of("weight"))), GenericArguments.optional(GenericArguments.string(Text.of("param"))))
 				.permission("simplepermissions.manage")
 				.executor(new GroupCommand(this)).build(), "pgroup");
 		
 		Sponge.getCommandManager().register(this, CommandSpec.builder()
-				.description(Text.of("SimpleSpongePermissions Groups Command"))
+				.description(Text.of("SimplePermissions Groups Command"))
 				.permission("simplepermissions.manage")
 				.executor(new GroupsCommand(this)).build(), "pgroups");
 		
 		Sponge.getCommandManager().register(this, CommandSpec.builder()
-				.description(Text.of("SimpleSpongePermissions Test Command"))
+				.description(Text.of("SimplePermissions Test Command"))
 				.arguments(GenericArguments.string(Text.of("permission")))
 				.executor(new TestCommand(this)).build(), "ptest");
 	}
