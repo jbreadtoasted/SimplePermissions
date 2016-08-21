@@ -29,7 +29,7 @@ public class SimpleSubjectCollectionSerializer implements TypeSerializer<SimpleS
 				}
 			}
 
-			if (granted.isEmpty() && denied.isEmpty()) {
+			if (granted.isEmpty() && denied.isEmpty() && ((SimpleSubject) s).canBeRemovedIfEmpty()) {
 				value.removeChild(s.getIdentifier());
 			} else {
 				if (!granted.isEmpty()) {
@@ -42,6 +42,10 @@ public class SimpleSubjectCollectionSerializer implements TypeSerializer<SimpleS
 					value.getNode(s.getIdentifier()).getNode("denied").setValue(denied);
 				} else {
 					value.getNode(s.getIdentifier()).removeChild("denied");
+				}
+				
+				if (granted.isEmpty() && denied.isEmpty()) {
+					value.getNode(s.getIdentifier()).getNode("persistent").setValue(true);
 				}
 			}
 		}

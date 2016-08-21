@@ -25,6 +25,7 @@ public class SimpleSubject implements Subject, SubjectData {
 	private final SimpleSubjectCollection collection; 
 	private final Map<String,Boolean> permissions = new HashMap<String,Boolean>();
 	private final Map<Set<Context>, Map<String, Boolean>> map = new HashMap<Set<Context>, Map<String, Boolean>>();
+	private boolean removeIfEmpty = false;
 
 	public SimpleSubject(String identifier, SimpleSubjectCollection collection) {
 		this.identifier = identifier;
@@ -238,5 +239,17 @@ public class SimpleSubject implements Subject, SubjectData {
 	// SpongeAPI 5 Override
 	public Optional<String> getOption(Set<Context> contexts, String key) {
 		return Optional.empty();
+	}
+	
+	
+	/**
+	 * Invoking this method will disallow persistence while saving the config file. If the Subject doesn't have any configuration, it'll be removed from the config file.
+	 */
+	public void removeIfEmpty() {
+		this.removeIfEmpty = true;
+	}
+	
+	public boolean canBeRemovedIfEmpty() {
+		return this.removeIfEmpty;
 	}
 }

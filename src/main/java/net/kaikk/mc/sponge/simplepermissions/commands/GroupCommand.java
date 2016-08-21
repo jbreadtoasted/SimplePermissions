@@ -94,6 +94,7 @@ public class GroupCommand implements CommandExecutor {
 			permission = permission.substring(1);
 		}
 		group.getSubjectData().setPermission(null, permission, Tristate.UNDEFINED);
+		group.removeIfEmpty();
 		src.sendMessage(Text.of(TextColors.AQUA, group.getIdentifier(), "'s permission ", TextColors.GOLD, permission, TextColors.AQUA, " removed"));
 	}
 

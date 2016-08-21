@@ -123,4 +123,10 @@ public class UserSubject extends SimpleSubject {
 		map.put(null, this.getParents());
 		return map;
 	}
+	
+	// Users will be always removed from the config file if there isn't any specific setting
+	@Override
+	public boolean canBeRemovedIfEmpty() {
+		return true;
+	}
 }

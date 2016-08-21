@@ -31,31 +31,40 @@ public class GroupSubjectCollectionSerializer implements TypeSerializer<GroupSub
 				}
 			}
 
-			if (granted.isEmpty() && denied.isEmpty() && gs.getParent()==null && gs.getWeight()==0) {
+			if (granted.isEmpty() && denied.isEmpty() && gs.getParent()==null && gs.getWeight()==0 && gs.canBeRemovedIfEmpty()) {
 				value.removeChild(s.getIdentifier());
 			} else {
+				boolean persistent = true;
 				if (!granted.isEmpty()) {
 					value.getNode(s.getIdentifier()).getNode("granted").setValue(granted);
+					persistent = false;
 				} else {
 					value.getNode(s.getIdentifier()).removeChild("granted");
 				}
 
 				if (!denied.isEmpty()) {
 					value.getNode(s.getIdentifier()).getNode("denied").setValue(denied);
+					persistent = false;
 				} else {
 					value.getNode(s.getIdentifier()).removeChild("denied");
 				}
 				
 				if (gs.getWeight()!=0) {
 					value.getNode(s.getIdentifier()).getNode("weight").setValue(gs.getWeight());
+					persistent = false;
 				} else {
 					value.getNode(s.getIdentifier()).removeChild("weight");
 				}
 
 				if (gs.getParent()!=null) {
 					value.getNode(s.getIdentifier()).getNode("parent").setValue(gs.getParent().getIdentifier());
+					persistent = false;
 				} else {
 					value.getNode(s.getIdentifier()).removeChild("parent");
+				}
+				
+				if (persistent) {
+					value.getNode(s.getIdentifier()).getNode("persistent").setValue(true);
 				}
 			}
 		}
