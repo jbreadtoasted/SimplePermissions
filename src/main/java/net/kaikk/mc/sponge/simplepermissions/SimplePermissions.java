@@ -33,6 +33,7 @@ import org.spongepowered.api.util.Tristate;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 
+import net.kaikk.mc.sponge.simplepermissions.commands.DebugCommand;
 import net.kaikk.mc.sponge.simplepermissions.commands.GroupCommand;
 import net.kaikk.mc.sponge.simplepermissions.commands.GroupsCommand;
 import net.kaikk.mc.sponge.simplepermissions.commands.TestCommand;
@@ -68,6 +69,8 @@ public class SimplePermissions implements PermissionService {
 	
 	@Inject
 	private Logger logger;
+	
+	public boolean debug;
 	
 	@Listener
 	public void onServerInitialize(GameInitializationEvent event) throws Exception {
@@ -110,6 +113,12 @@ public class SimplePermissions implements PermissionService {
 				.description(Text.of("SimplePermissions Test Command"))
 				.arguments(GenericArguments.string(Text.of("permission")))
 				.executor(new TestCommand(this)).build(), "ptest");
+		
+		Sponge.getCommandManager().register(this, CommandSpec.builder()
+				.description(Text.of("SimplePermissions Debug Command"))
+				.permission("simplepermissions.manage")
+				.arguments(GenericArguments.bool(Text.of("truefalse")))
+				.executor(new DebugCommand(this)).build(), "pdebug");
 	}
 	
 	@Listener
@@ -144,6 +153,9 @@ public class SimplePermissions implements PermissionService {
 
 	@Override
 	public SubjectCollection getSubjects(String identifier) {
+		if (this.debug) {
+			this.logger().info("Requested subject collection '"+identifier+"' by "+Utils.getCaller());
+		}
 		if (identifier.equals(PermissionService.SUBJECTS_USER)) {
 			return this.getUserSubjects();
 		} else if (identifier.equals(PermissionService.SUBJECTS_GROUP)) {
@@ -152,6 +164,9 @@ public class SimplePermissions implements PermissionService {
 		
 		SubjectCollection collection = knownSubjectsMap.get(identifier);
 		if (collection==null) {
+			if (this.debug) {
+				this.logger().info("Creating new custom subject collection "+identifier);
+			}
 			collection = new SimpleSubjectCollection(identifier);
 			knownSubjectsMap.put(identifier, collection);
 			customSubjectsMap.put(identifier, collection);

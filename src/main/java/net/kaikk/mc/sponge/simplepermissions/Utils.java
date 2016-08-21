@@ -80,4 +80,9 @@ public class Utils {
 	public static Tristate tristate(@Nullable Boolean b) {
 		return b==null ? Tristate.UNDEFINED : b ? Tristate.TRUE : Tristate.FALSE;
 	}
+	
+	public static String getCaller() {
+	  final StackTraceElement[] a = Thread.currentThread().getStackTrace();
+	  return a[a.length - 4].toString();
+	}
 }

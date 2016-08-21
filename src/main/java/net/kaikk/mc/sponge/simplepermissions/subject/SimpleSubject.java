@@ -18,6 +18,7 @@ import org.spongepowered.api.text.Text.Builder;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 
+import net.kaikk.mc.sponge.simplepermissions.SimplePermissions;
 import net.kaikk.mc.sponge.simplepermissions.Utils;
 
 public class SimpleSubject implements Subject, SubjectData {
@@ -86,6 +87,9 @@ public class SimpleSubject implements Subject, SubjectData {
 					}
 				}
 			}
+		}
+		if (SimplePermissions.instance().debug) {
+			SimplePermissions.instance().logger().info("Requested permission "+permission+" to "+this.getClass().getSimpleName()+" '"+identifier+"', result: "+Utils.tristate(b));
 		}
 		return Utils.tristate(b);
 	}
