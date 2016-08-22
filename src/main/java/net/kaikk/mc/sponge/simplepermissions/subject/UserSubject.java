@@ -2,7 +2,6 @@ package net.kaikk.mc.sponge.simplepermissions.subject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -119,7 +119,7 @@ public class UserSubject extends SimpleSubject {
 	
 	@Override
 	public Map<Set<Context>, List<Subject>> getAllParents() {
-		Map<Set<Context>, List<Subject>> map = new HashMap<Set<Context>, List<Subject>>();
+		Map<Set<Context>, List<Subject>> map = new ConcurrentHashMap<Set<Context>, List<Subject>>();
 		map.put(null, this.getParents());
 		return map;
 	}

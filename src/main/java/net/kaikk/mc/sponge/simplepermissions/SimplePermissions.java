@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -60,8 +60,8 @@ public class SimplePermissions implements PermissionService {
 	
 	private UserSubjectCollection users = new UserSubjectCollection();
 	private GroupSubjectCollection groups = new GroupSubjectCollection();
-	private Map<String, SubjectCollection> knownSubjectsMap = new HashMap<String,SubjectCollection>();
-	private Map<String, SubjectCollection> customSubjectsMap = new HashMap<String,SubjectCollection>();
+	private Map<String, SubjectCollection> knownSubjectsMap = new ConcurrentHashMap<String,SubjectCollection>();
+	private Map<String, SubjectCollection> customSubjectsMap = new ConcurrentHashMap<String,SubjectCollection>();
 	
 	@Inject
 	@ConfigDir(sharedRoot = false)
@@ -194,7 +194,7 @@ public class SimplePermissions implements PermissionService {
 		return Collections.emptyList(); // TODO
 	}
 
-	public void loadData() throws IOException, ObjectMappingException {
+	synchronized public void loadData() throws IOException, ObjectMappingException {
 		privateConfigDir.toFile().mkdirs();
 		if (privateConfigDir.resolve("groups.conf").toFile().exists()) {
 			ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(privateConfigDir.resolve("groups.conf")).build();
@@ -243,7 +243,7 @@ public class SimplePermissions implements PermissionService {
 		}
 	}
 	
-	public void saveData() throws IOException, ObjectMappingException {
+	synchronized public void saveData() throws IOException, ObjectMappingException {
 		privateConfigDir.toFile().mkdirs();
 		// users
 		ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(privateConfigDir.resolve("users.conf")).build();

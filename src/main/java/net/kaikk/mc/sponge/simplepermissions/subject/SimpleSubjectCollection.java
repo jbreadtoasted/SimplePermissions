@@ -2,10 +2,10 @@ package net.kaikk.mc.sponge.simplepermissions.subject;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -17,8 +17,8 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 public class SimpleSubjectCollection implements SubjectCollection {
 	protected String identifier;
-	protected Map<String,Subject> identifiersToSubject = Collections.synchronizedMap(new HashMap<String,Subject>());
-	protected Map<String,Map<Subject,Boolean>> grantedPermissionsToSubjects = Collections.synchronizedMap(new HashMap<String,Map<Subject,Boolean>>());
+	protected Map<String,Subject> identifiersToSubject = new ConcurrentHashMap<String,Subject>();
+	protected Map<String,Map<Subject,Boolean>> grantedPermissionsToSubjects = new ConcurrentHashMap<String,Map<Subject,Boolean>>();
 	
 	public SimpleSubjectCollection() {
 		this.identifier = "undefined";
@@ -85,7 +85,7 @@ public class SimpleSubjectCollection implements SubjectCollection {
 		if (value==Tristate.TRUE) {
 			Map<Subject, Boolean> m = this.grantedPermissionsToSubjects.get(permission);
 			if (m==null) {
-				m = Collections.synchronizedMap(new HashMap<Subject, Boolean>());
+				m = new ConcurrentHashMap<Subject, Boolean>();
 				this.grantedPermissionsToSubjects.put(permission, m);
 			}
 			m.put(subject, true);
@@ -115,7 +115,7 @@ public class SimpleSubjectCollection implements SubjectCollection {
 			for (Entry<String, Boolean> permission : subject.getSubjectData().getPermissions(null).entrySet()) {
 				Map<Subject,Boolean> map = this.grantedPermissionsToSubjects.get(permission.getKey());
 				if (map==null) {
-					map = new HashMap<Subject,Boolean>();
+					map = new ConcurrentHashMap<Subject,Boolean>();
 					this.grantedPermissionsToSubjects.put(permission.getKey(), map);
 				}
 				map.put(subject, permission.getValue());

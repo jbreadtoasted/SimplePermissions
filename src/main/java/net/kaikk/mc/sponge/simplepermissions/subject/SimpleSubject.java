@@ -1,12 +1,12 @@
 package net.kaikk.mc.sponge.simplepermissions.subject;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
@@ -24,8 +24,8 @@ import net.kaikk.mc.sponge.simplepermissions.Utils;
 public class SimpleSubject implements Subject, SubjectData {
 	private final String identifier;
 	private final SimpleSubjectCollection collection; 
-	private final Map<String,Boolean> permissions = new HashMap<String,Boolean>();
-	private final Map<Set<Context>, Map<String, Boolean>> map = new HashMap<Set<Context>, Map<String, Boolean>>();
+	private final Map<String,Boolean> permissions = new ConcurrentHashMap<String,Boolean>();
+	private final Map<Set<Context>, Map<String, Boolean>> map = new ConcurrentHashMap<Set<Context>, Map<String, Boolean>>();
 	private boolean removeIfEmpty = false;
 
 	public SimpleSubject(String identifier, SimpleSubjectCollection collection) {

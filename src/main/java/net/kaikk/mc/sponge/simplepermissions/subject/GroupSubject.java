@@ -1,11 +1,11 @@
 package net.kaikk.mc.sponge.simplepermissions.subject;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -137,7 +137,7 @@ public class GroupSubject extends SimpleSubject {
 
 	@Override
 	public Map<Set<Context>, List<Subject>> getAllParents() {
-		Map<Set<Context>, List<Subject>> map = new HashMap<Set<Context>, List<Subject>>();
+		Map<Set<Context>, List<Subject>> map = new ConcurrentHashMap<Set<Context>, List<Subject>>();
 		map.put(null, this.getParents());
 		return map;
 	}
