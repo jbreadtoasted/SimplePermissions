@@ -158,7 +158,7 @@ public class SimplePermissions implements PermissionService {
 		}
 		if (identifier.equals(PermissionService.SUBJECTS_USER)) {
 			return this.getUserSubjects();
-		} else if (identifier.equals(PermissionService.SUBJECTS_GROUP)) {
+		} else if (identifier.equals(PermissionService.SUBJECTS_GROUP) || identifier.equals("default")) {
 			return this.getGroupSubjects();
 		}
 		
