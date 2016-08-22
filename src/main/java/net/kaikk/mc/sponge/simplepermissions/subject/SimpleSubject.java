@@ -162,6 +162,9 @@ public class SimpleSubject implements Subject, SubjectData {
 
 	@Override
 	public boolean setPermission(Set<Context> contexts, String permission, Tristate value) {
+		if (SimplePermissions.instance().debug) {
+			SimplePermissions.instance().logger().info("Adding permission "+permission+" to "+this.getClass().getSimpleName()+" '"+identifier+"'");
+		}
 		permission = permission.toLowerCase();
 		if (value==Tristate.UNDEFINED) {
 			permissions.remove(permission);
