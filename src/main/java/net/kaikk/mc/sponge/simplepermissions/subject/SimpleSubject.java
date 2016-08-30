@@ -26,6 +26,7 @@ public class SimpleSubject implements Subject, SubjectData {
 	private final SimpleSubjectCollection collection; 
 	private final Map<String,Boolean> permissions = new ConcurrentHashMap<String,Boolean>();
 	private final Map<Set<Context>, Map<String, Boolean>> map = new ConcurrentHashMap<Set<Context>, Map<String, Boolean>>();
+	private final Map<Set<Context>, Map<String, String>> options = new ConcurrentHashMap<Set<Context>, Map<String, String>>();
 	private boolean removeIfEmpty = false;
 
 	public SimpleSubject(String identifier, SimpleSubjectCollection collection) {
@@ -220,32 +221,47 @@ public class SimpleSubject implements Subject, SubjectData {
 
 	// SpongeAPI 5 Override
 	public Map<Set<Context>, Map<String, String>> getAllOptions() {
-		return Collections.emptyMap(); // TODO
+		return this.options;
 	}
 
 	// SpongeAPI 5 Override
 	public Map<String, String> getOptions(Set<Context> contexts) {
-		return Collections.emptyMap(); // TODO
+		Map<String, String> opts = this.options.get(contexts);
+		if (opts == null) {
+			opts = new ConcurrentHashMap<String, String>();
+			this.options.put(contexts, opts);
+		}
+		return opts;
 	}
 
 	// SpongeAPI 5 Override
 	public boolean setOption(Set<Context> contexts, String key, String value) {
-		return false;
+		Map<String, String> opts = this.options.get(contexts);
+		if (opts == null) {
+			opts = new ConcurrentHashMap<String, String>();
+			this.options.put(contexts, opts);
+		}
+		return opts.put(key, value) == null;
 	}
 
 	// SpongeAPI 5 Override
 	public boolean clearOptions(Set<Context> contexts) {
-		return false;
+		return this.options.remove(contexts) != null;
 	}
 
 	// SpongeAPI 5 Override
 	public boolean clearOptions() {
-		return false;
+		this.options.clear();
+		return true;
 	}
 
 	// SpongeAPI 5 Override
 	public Optional<String> getOption(Set<Context> contexts, String key) {
-		return Optional.empty();
+		Map<String, String> opts = this.options.get(contexts);
+		if (opts == null) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(opts.get(key));
 	}
 	
 	
