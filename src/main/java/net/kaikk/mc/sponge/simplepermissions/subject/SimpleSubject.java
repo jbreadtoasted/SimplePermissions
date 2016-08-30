@@ -24,15 +24,15 @@ import net.kaikk.mc.sponge.simplepermissions.Utils;
 public class SimpleSubject implements Subject, SubjectData {
 	private final String identifier;
 	private final SimpleSubjectCollection collection; 
-	private final Map<String,Boolean> permissions = new ConcurrentHashMap<String,Boolean>();
-	private final Map<Set<Context>, Map<String, Boolean>> map = new ConcurrentHashMap<Set<Context>, Map<String, Boolean>>();
+	private final Map<String,Boolean> globalPermissions = new ConcurrentHashMap<String,Boolean>();
+	private final Map<Set<Context>, Map<String, Boolean>> permissionsMap = new ConcurrentHashMap<Set<Context>, Map<String, Boolean>>();
 	private final Map<Set<Context>, Map<String, String>> options = new ConcurrentHashMap<Set<Context>, Map<String, String>>();
 	private boolean removeIfEmpty = false;
 
 	public SimpleSubject(String identifier, SimpleSubjectCollection collection) {
 		this.identifier = identifier;
 		this.collection = collection;
-		map.put(GLOBAL_CONTEXT, permissions);
+		permissionsMap.put(GLOBAL_CONTEXT, globalPermissions);
 	}
 	
 	@Override
@@ -73,16 +73,16 @@ public class SimpleSubject implements Subject, SubjectData {
 	@Override
 	public Tristate getPermissionValue(Set<Context> contexts, String permission) {
 		permission = permission.toLowerCase();
-		Boolean b = this.permissions.get(permission);
+		Boolean b = this.globalPermissions.get(permission);
 		if (b==null) {
-			b = this.permissions.get("*");
+			b = this.globalPermissions.get("*");
 			if (b==null) {
 				String[] split = permission.split("[.]");
 				StringBuilder pb = new StringBuilder();
 				for(int i=0; i<split.length-1; i++) {
 					pb.append(split[i]);
 					pb.append('.');
-					b = this.permissions.get(pb.toString()+"*");
+					b = this.globalPermissions.get(pb.toString()+"*");
 					if (b!=null) {
 						break;
 					}
@@ -153,12 +153,12 @@ public class SimpleSubject implements Subject, SubjectData {
 
 	@Override
 	public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
-		return map;
+		return permissionsMap;
 	}
 
 	@Override
 	public Map<String, Boolean> getPermissions(Set<Context> contexts) {
-		return permissions;
+		return globalPermissions;
 	}
 
 	@Override
@@ -168,9 +168,9 @@ public class SimpleSubject implements Subject, SubjectData {
 		}
 		permission = permission.toLowerCase();
 		if (value==Tristate.UNDEFINED) {
-			permissions.remove(permission);
+			globalPermissions.remove(permission);
 		} else {
-			permissions.put(permission, value == Tristate.TRUE);
+			globalPermissions.put(permission, value == Tristate.TRUE);
 		}
 		
 		((SimpleSubjectCollection) this.getContainingCollection()).storePermission(this, permission, value);
@@ -179,13 +179,13 @@ public class SimpleSubject implements Subject, SubjectData {
 
 	@Override
 	public boolean clearPermissions() {
-		permissions.clear();
+		globalPermissions.clear();
 		return true;
 	}
 
 	@Override
 	public boolean clearPermissions(Set<Context> contexts) {
-		permissions.clear();
+		globalPermissions.clear();
 		return true;
 	}
 
