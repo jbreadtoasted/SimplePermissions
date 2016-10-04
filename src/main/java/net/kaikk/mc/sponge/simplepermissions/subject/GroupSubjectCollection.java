@@ -13,7 +13,7 @@ public class GroupSubjectCollection extends SimpleSubjectCollection {
 		Subject s = this.identifiersToSubject.get(identifier.toLowerCase());
 		if (s==null) {
 			s = new GroupSubject(identifier, this);
-			this.identifiersToSubject.put(identifier, s);
+			this.identifiersToSubject.put(identifier.toLowerCase(), s);
 		}
 		return s;
 	}
