@@ -35,8 +35,10 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 
 import net.kaikk.mc.sponge.simplepermissions.commands.DebugCommand;
+import net.kaikk.mc.sponge.simplepermissions.commands.DeopCommand;
 import net.kaikk.mc.sponge.simplepermissions.commands.GroupCommand;
 import net.kaikk.mc.sponge.simplepermissions.commands.GroupsCommand;
+import net.kaikk.mc.sponge.simplepermissions.commands.OpCommand;
 import net.kaikk.mc.sponge.simplepermissions.commands.TestCommand;
 import net.kaikk.mc.sponge.simplepermissions.commands.UserCommand;
 import net.kaikk.mc.sponge.simplepermissions.subject.GroupSubject;
@@ -122,6 +124,18 @@ public class SimplePermissions implements PermissionService {
 				.permission("simplepermissions.manage")
 				.arguments(GenericArguments.bool(Text.of("truefalse")))
 				.executor(new DebugCommand(this)).build(), "pdebug");
+		
+		Sponge.getCommandManager().register(this, CommandSpec.builder()
+				.description(Text.of("SimplePermissions Op Command"))
+				.permission("simplepermissions.manage")
+				.arguments(GenericArguments.user(Text.of("user")))
+				.executor(new OpCommand(this)).build(), "op");
+		
+		Sponge.getCommandManager().register(this, CommandSpec.builder()
+				.description(Text.of("SimplePermissions Deop Command"))
+				.permission("simplepermissions.manage")
+				.arguments(GenericArguments.user(Text.of("user")))
+				.executor(new DeopCommand(this)).build(), "deop");
 		
 		loaded = true;
 	}
