@@ -35,17 +35,17 @@ public class SimpleSubjectCollection implements SubjectCollection {
 	
 	@Override
 	public Subject get(String identifier) {
-		Subject s = this.identifiersToSubject.get(identifier);
+		Subject s = this.identifiersToSubject.get(identifier.toLowerCase());
 		if (s==null) {
-			s = new SimpleSubject(identifier, this);
-			this.identifiersToSubject.put(identifier, s);
+			s = this.newSubject(identifier);
+			this.identifiersToSubject.put(identifier.toLowerCase(), s);
 		}
 		return s;
 	}
 
 	@Override
 	public boolean hasRegistered(String identifier) {
-		return identifiersToSubject.containsKey(identifier);
+		return identifiersToSubject.containsKey(identifier.toLowerCase());
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class SimpleSubjectCollection implements SubjectCollection {
 	}
 	
 	public void transientStorePermission(Subject subject, String permission, Tristate value) {
-		this.identifiersToSubject.putIfAbsent(subject.getIdentifier(), subject);
+		this.identifiersToSubject.putIfAbsent(subject.getIdentifier().toLowerCase(), subject);
 		
 		if (value==Tristate.TRUE) {
 			Map<Subject, Boolean> m = this.grantedPermissionsToSubjects.get(permission);
@@ -98,7 +98,7 @@ public class SimpleSubjectCollection implements SubjectCollection {
 	}
 	
 	public void remove(String identifier) {
-		Subject s = this.identifiersToSubject.remove(identifier);
+		Subject s = this.identifiersToSubject.remove(identifier.toLowerCase());
 		if (s!=null) {
 			this.remove(s);
 		}
@@ -111,7 +111,7 @@ public class SimpleSubjectCollection implements SubjectCollection {
 	}
 	
 	public void add(SimpleSubject subject) {
-		if (this.identifiersToSubject.putIfAbsent(subject.getIdentifier(), subject)==null) {
+		if (this.identifiersToSubject.putIfAbsent(subject.getIdentifier().toLowerCase(), subject)==null) {
 			for (Entry<String, Boolean> permission : subject.getSubjectData().getPermissions(null).entrySet()) {
 				Map<Subject,Boolean> map = this.grantedPermissionsToSubjects.get(permission.getKey());
 				if (map==null) {
@@ -125,5 +125,9 @@ public class SimpleSubjectCollection implements SubjectCollection {
 	
 	public int size() {
 		return this.identifiersToSubject.size();
+	}
+
+	protected SimpleSubject newSubject(String identifier) {
+		return new SimpleSubject(identifier, this);
 	}
 }

@@ -1,7 +1,6 @@
 package net.kaikk.mc.sponge.simplepermissions.subject;
 
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
 
 public class GroupSubjectCollection extends SimpleSubjectCollection {
 	public GroupSubjectCollection() {
@@ -9,12 +8,7 @@ public class GroupSubjectCollection extends SimpleSubjectCollection {
 	}
 	
 	@Override
-	public Subject get(String identifier) {
-		Subject s = this.identifiersToSubject.get(identifier.toLowerCase());
-		if (s==null) {
-			s = new GroupSubject(identifier, this);
-			this.identifiersToSubject.put(identifier.toLowerCase(), s);
-		}
-		return s;
+	protected SimpleSubject newSubject(String identifier) {
+		return new GroupSubject(identifier, this);
 	}
 }
