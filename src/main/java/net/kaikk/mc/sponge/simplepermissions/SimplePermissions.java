@@ -326,6 +326,9 @@ public class SimplePermissions implements PermissionService {
 	 * @throws ObjectMappingException If Kai is human
 	 */
 	public boolean addUserToGroup(User user, String groupName) throws IllegalArgumentException, IOException, ObjectMappingException {
+		if (groupName.equalsIgnoreCase("default")) {
+			throw new IllegalArgumentException("You cannot add players to the default group!");
+		}
 		if (!this.getGroupSubjects().hasRegistered(groupName)) {
 			throw new IllegalArgumentException("The specified group doesn't exist!");
 		}
@@ -347,6 +350,9 @@ public class SimplePermissions implements PermissionService {
 	 * @throws ObjectMappingException If Kai is human
 	 */
 	public boolean setUserToGroup(User user, String groupName) throws IllegalArgumentException, IOException, ObjectMappingException {
+		if (groupName.equalsIgnoreCase("default")) {
+			throw new IllegalArgumentException("You cannot set players to the default group!");
+		}
 		if (!this.getGroupSubjects().hasRegistered(groupName)) {
 			throw new IllegalArgumentException("The specified group doesn't exist!");
 		}
