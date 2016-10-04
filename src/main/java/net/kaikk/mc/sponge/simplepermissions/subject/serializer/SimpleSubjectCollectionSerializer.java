@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectData;
 
 import com.google.common.reflect.TypeToken;
 
@@ -16,6 +17,9 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 
 public class SimpleSubjectCollectionSerializer implements TypeSerializer<SimpleSubjectCollection> {
+	@SuppressWarnings("serial")
+	static final TypeToken<Map<String, String>> optionsTypeToken = new TypeToken<Map<String,String>>() {};
+	
 	@Override
 	public void serialize(TypeToken<?> type, SimpleSubjectCollection obj, ConfigurationNode value) throws ObjectMappingException {
 		for (Subject s : obj.getAllSubjects()) {
@@ -28,8 +32,10 @@ public class SimpleSubjectCollectionSerializer implements TypeSerializer<SimpleS
 					denied.add(e.getKey());
 				}
 			}
-
-			if (granted.isEmpty() && denied.isEmpty() && ((SimpleSubject) s).canBeRemovedIfEmpty()) {
+			
+			Map<String,String> options = s.getSubjectData().getOptions(SubjectData.GLOBAL_CONTEXT);
+			
+			if (granted.isEmpty() && denied.isEmpty() && options.isEmpty() && ((SimpleSubject) s).canBeRemovedIfEmpty()) {
 				value.removeChild(s.getIdentifier());
 			} else {
 				if (!granted.isEmpty()) {
@@ -44,7 +50,14 @@ public class SimpleSubjectCollectionSerializer implements TypeSerializer<SimpleS
 					value.getNode(s.getIdentifier()).removeChild("denied");
 				}
 				
-				if (granted.isEmpty() && denied.isEmpty()) {
+				
+				if (!options.isEmpty()) {
+					value.getNode(s.getIdentifier()).getNode("options").setValue(options);
+				} else {
+					value.getNode(s.getIdentifier()).removeChild("options");
+				}
+				
+				if (granted.isEmpty() && denied.isEmpty() && options.isEmpty()) {
 					value.getNode(s.getIdentifier()).getNode("persistent").setValue(true);
 				}
 			}
@@ -56,16 +69,24 @@ public class SimpleSubjectCollectionSerializer implements TypeSerializer<SimpleS
 		SimpleSubjectCollection collection = new SimpleSubjectCollection(value.getNode("identifier").getString("undefined"));
 		Map<Object, ? extends ConfigurationNode> users = value.getChildrenMap();
 		
-		for (Entry<Object, ? extends ConfigurationNode> groupEntry : users.entrySet()) {
-			SimpleSubject subject = new SimpleSubject(groupEntry.getKey().toString(), collection);
-			ConfigurationNode node = groupEntry.getValue().getNode("granted");
+		for (Entry<Object, ? extends ConfigurationNode> entry : users.entrySet()) {
+			SimpleSubject subject = new SimpleSubject(entry.getKey().toString(), collection);
+			ConfigurationNode node = entry.getValue().getNode("granted");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, true);
 			}
 			
-			node = groupEntry.getValue().getNode("denied");
+			node = entry.getValue().getNode("denied");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, false);
+			}
+			
+			node = entry.getValue().getNode("options");
+			if (node.hasMapChildren()) {
+				Map<String, String> options = node.getValue(optionsTypeToken);
+				if (options != null) {
+					subject.setOptions(SubjectData.GLOBAL_CONTEXT, options);
+				}
 			}
 			
 			collection.add(subject);

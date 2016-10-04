@@ -19,6 +19,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -72,8 +73,10 @@ public class SimplePermissions implements PermissionService {
 	
 	public boolean debug;
 	
+	private boolean loaded;
+	
 	@Listener
-	public void onServerInitialize(GameInitializationEvent event) throws Exception {
+	public void onGameInitialization(GameInitializationEvent event) throws Exception {
 		instance = this;
 
 		knownSubjectsMap.put(PermissionService.SUBJECTS_USER, this.getUserSubjects());
@@ -94,13 +97,13 @@ public class SimplePermissions implements PermissionService {
 		// register commands
 		Sponge.getCommandManager().register(this, CommandSpec.builder()
 				.description(Text.of("SimplePermissions User Command"))
-				.arguments(GenericArguments.user(Text.of("user")), GenericArguments.optional(Utils.buildChoices("choice", "add", "remove", "setgroup", "addgroup", "removegroup", "test")), GenericArguments.optional(GenericArguments.string(Text.of("param"))))
+				.arguments(GenericArguments.user(Text.of("user")), GenericArguments.optional(Utils.buildChoices("choice", "add", "remove", "setgroup", "addgroup", "removegroup", "option", "test")), GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("param"))))
 				.permission("simplepermissions.manage")
 				.executor(new UserCommand(this)).build(), "puser");
 		
 		Sponge.getCommandManager().register(this, CommandSpec.builder()
 				.description(Text.of("SimplePermissions Group Command"))
-				.arguments(GenericArguments.string(Text.of("group")), GenericArguments.optional(Utils.buildChoices("choice", "create", "delete", "add", "remove", "parent", "weight", "test")), GenericArguments.optionalWeak(GenericArguments.integer(Text.of("weight"))), GenericArguments.optional(GenericArguments.string(Text.of("param"))))
+				.arguments(GenericArguments.string(Text.of("group")), GenericArguments.optional(Utils.buildChoices("choice", "create", "delete", "add", "remove", "parent", "weight", "option", "test")), GenericArguments.optionalWeak(GenericArguments.integer(Text.of("weight"))), GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("param"))))
 				.permission("simplepermissions.manage")
 				.executor(new GroupCommand(this)).build(), "pgroup");
 		
@@ -119,11 +122,22 @@ public class SimplePermissions implements PermissionService {
 				.permission("simplepermissions.manage")
 				.arguments(GenericArguments.bool(Text.of("truefalse")))
 				.executor(new DebugCommand(this)).build(), "pdebug");
+		
+		loaded = true;
 	}
 	
 	@Listener
-	public void onServerReload(GameReloadEvent event) throws IOException, ObjectMappingException {
+	public void onGameReload(GameReloadEvent event) throws IOException, ObjectMappingException {
+		loaded = false;
 		this.loadData();
+		loaded = true;
+	}
+	
+	@Listener
+	public void onGameStopping(GameStoppingEvent event) throws Exception {
+		if (loaded) {
+			this.saveData();
+		}
 	}
 
 	@Override
@@ -383,6 +397,16 @@ public class SimplePermissions implements PermissionService {
 		UserSubject us = (UserSubject) this.getUserSubjects().get(user.getIdentifier());
 		us.getGroups().remove(gs);
 		this.saveData();
+		return true;
+	}
+	
+	public boolean setOption(Subject subject, String key, String value) {
+		subject.getSubjectData().setOption(SubjectData.GLOBAL_CONTEXT, key, value);
+		try {
+			this.saveData();
+		} catch (IOException | ObjectMappingException e) {
+			e.printStackTrace();
+		}
 		return true;
 	}
 

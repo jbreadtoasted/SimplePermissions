@@ -119,17 +119,36 @@ public class GroupSubject extends SimpleSubject {
 		Builder b = Text.builder();
 		b.append(Text.of(TextColors.GREEN, "-- SimplePermissions - Group ", TextColors.GOLD, this.getIdentifier(), TextColors.GREEN, " --", Text.NEW_LINE));
 
+		boolean d = true;
+		
 		if (this.parent!=null) {
+			d = false;
 			b.append(Text.of(TextColors.GREEN, "Parent: ", TextColors.AQUA, this.parent.getIdentifier(), Text.NEW_LINE));
 		}
 
 		if (this.weight!=0) {
+			d = false;
 			b.append(Text.of(TextColors.GREEN, "Weight: ", TextColors.AQUA, this.weight, Text.NEW_LINE));
 		}
 
-		b.append(Text.of(TextColors.GREEN, "Permissions:", Text.NEW_LINE));
-		for(Entry<String,Boolean> e : this.getSubjectData().getPermissions(null).entrySet()) {
-			b.append(e.getValue() ? Text.of(TextColors.GREEN, "+ ") : Text.of(TextColors.RED, "- "), Text.of(TextColors.AQUA, e.getKey()), Text.NEW_LINE);
+		if (!this.getSubjectData().getPermissions(null).isEmpty()) {
+			d = false;
+			b.append(Text.of(TextColors.GREEN, "Permissions:", Text.NEW_LINE));
+			for(Entry<String,Boolean> e : this.getSubjectData().getPermissions(null).entrySet()) {
+				b.append(e.getValue() ? Text.of(TextColors.GREEN, "+ ") : Text.of(TextColors.RED, "- "), Text.of(TextColors.AQUA, e.getKey()), Text.NEW_LINE);
+			}
+		}
+		
+		if (!this.getSubjectData().getOptions(GLOBAL_CONTEXT).isEmpty()) {
+			d = false;
+			b.append(Text.of(TextColors.GREEN, "Options:", Text.NEW_LINE));
+			for(Entry<String,String> e : this.getSubjectData().getOptions(GLOBAL_CONTEXT).entrySet()) {
+				b.append(Text.of(TextColors.AQUA, "- ", e.getKey(), ": ", TextColors.AQUA, TextColors.DARK_BLUE, e.getValue(), Text.NEW_LINE));
+			}
+		}
+		
+		if (d) {
+			b.append(Text.of(TextColors.RED, "This group doesn't have any data yet!"));
 		}
 
 		return b.build();

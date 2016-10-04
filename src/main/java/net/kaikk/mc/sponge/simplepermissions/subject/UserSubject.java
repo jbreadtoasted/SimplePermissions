@@ -90,8 +90,10 @@ public class UserSubject extends SimpleSubject {
 		Optional<GameProfile> profile = Sponge.getServer().getGameProfileManager().getCache().getById(UUID.fromString(this.getIdentifier()));
 		String name = profile.isPresent() && profile.get().getName().isPresent() ? profile.get().getName().get() : this.getIdentifier();
 		b.append(Text.of(TextColors.GREEN, "-- SimplePermissions - ", TextColors.GOLD, name, TextColors.GREEN, " --", Text.NEW_LINE));
+		boolean d = true;
 		
 		if (!this.getGroups().isEmpty()) {
+			d = false;
 			StringBuilder sb = new StringBuilder();
 			for(GroupSubject g : this.getGroups()) {
 				sb.append(g.getIdentifier());
@@ -100,9 +102,25 @@ public class UserSubject extends SimpleSubject {
 			b.append(Text.of(TextColors.GREEN, "Groups: ", TextColors.AQUA, sb.substring(0, sb.length()-2), Text.NEW_LINE));
 		}
 		
-		b.append(Text.of(TextColors.GREEN, "Permissions:", Text.NEW_LINE));
-		for(Entry<String,Boolean> e : this.getSubjectData().getPermissions(null).entrySet()) {
-			b.append(e.getValue() ? Text.of(TextColors.GREEN, "+ ") : Text.of(TextColors.RED, "- "), Text.of(TextColors.AQUA, e.getKey()), Text.NEW_LINE);
+		
+		if (!this.getSubjectData().getPermissions(null).isEmpty()) {
+			d = false;
+			b.append(Text.of(TextColors.GREEN, "Permissions:", Text.NEW_LINE));
+			for(Entry<String,Boolean> e : this.getSubjectData().getPermissions(null).entrySet()) {
+				b.append(e.getValue() ? Text.of(TextColors.GREEN, "+ ") : Text.of(TextColors.RED, "- "), Text.of(TextColors.AQUA, e.getKey()), Text.NEW_LINE);
+			}
+		}
+		
+		if (!this.getSubjectData().getOptions(GLOBAL_CONTEXT).isEmpty()) {
+			d = false;
+			b.append(Text.of(TextColors.GREEN, "Options:", Text.NEW_LINE));
+			for(Entry<String,String> e : this.getSubjectData().getOptions(GLOBAL_CONTEXT).entrySet()) {
+				b.append(Text.of(TextColors.AQUA, "- ", e.getKey(), ": ", TextColors.AQUA, TextColors.DARK_BLUE, e.getValue(), Text.NEW_LINE));
+			}
+		}
+		
+		if (d) {
+			b.append(Text.of(TextColors.RED, "This user doesn't have any data yet!"));
 		}
 		
 		return b.build();

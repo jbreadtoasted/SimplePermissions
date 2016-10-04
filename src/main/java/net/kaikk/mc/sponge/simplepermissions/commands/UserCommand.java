@@ -45,6 +45,7 @@ public class UserCommand implements CommandExecutor {
 			case "addgroup": this.addGroup(src, user, param); break;
 			case "removegroup": this.removeGroup(src, user, param); break;
 			case "setgroup": this.setGroup(src, user, param); break;
+			case "option": this.setOption(src, user, param); break;
 			case "test": this.test(src, user, param); break;
 			default: return CommandResult.empty();
 			}
@@ -55,6 +56,17 @@ public class UserCommand implements CommandExecutor {
 		return CommandResult.success();
 	}
 	
+	private void setOption(CommandSource src, User user, String param) {
+		if (param == null) {
+			src.sendMessage(Text.of(TextColors.RED, "Usage: /puser <group> option <option-key> [value]"));
+			return;
+		}
+		String[] s = param.split(" ", 2);
+		String value = s.length>1 ? s[1] : "";
+		instance.setOption(user, s[0], value);
+		src.sendMessage(Text.of(TextColors.AQUA, user.getName(), "'s option ", TextColors.GOLD, s[0], TextColors.AQUA, " set to \"", TextColors.GOLD, value, TextColors.AQUA, "\""));
+	}
+
 	public void userInfo(CommandSource src, User user) {
 		src.sendMessage(((UserSubject) instance.getUserSubjects().get(user.getIdentifier())).info());
 	}

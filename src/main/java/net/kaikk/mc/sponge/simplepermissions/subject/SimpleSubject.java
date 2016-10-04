@@ -25,14 +25,16 @@ public class SimpleSubject implements Subject, SubjectData {
 	private final String identifier;
 	private final SimpleSubjectCollection collection; 
 	private final Map<String,Boolean> globalPermissions = new ConcurrentHashMap<String,Boolean>();
-	private final Map<Set<Context>, Map<String, Boolean>> permissionsMap = new ConcurrentHashMap<Set<Context>, Map<String, Boolean>>();
+	private final Map<String,String> globalOptions = new ConcurrentHashMap<String,String>();
+	private final Map<Set<Context>, Map<String, Boolean>> permissions = new ConcurrentHashMap<Set<Context>, Map<String, Boolean>>();
 	private final Map<Set<Context>, Map<String, String>> options = new ConcurrentHashMap<Set<Context>, Map<String, String>>();
 	private boolean removeIfEmpty = false;
-
+	
 	public SimpleSubject(String identifier, SimpleSubjectCollection collection) {
 		this.identifier = identifier;
 		this.collection = collection;
-		permissionsMap.put(GLOBAL_CONTEXT, globalPermissions);
+		permissions.put(GLOBAL_CONTEXT, globalPermissions);
+		options.put(GLOBAL_CONTEXT, globalOptions);
 	}
 	
 	@Override
@@ -153,7 +155,7 @@ public class SimpleSubject implements Subject, SubjectData {
 
 	@Override
 	public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
-		return permissionsMap;
+		return permissions;
 	}
 
 	@Override
@@ -220,6 +222,7 @@ public class SimpleSubject implements Subject, SubjectData {
 	}
 
 	// SpongeAPI 5 Override
+	@Override
 	public Map<Set<Context>, Map<String, String>> getAllOptions() {
 		return this.options;
 	}
@@ -264,6 +267,18 @@ public class SimpleSubject implements Subject, SubjectData {
 		return Optional.ofNullable(opts.get(key));
 	}
 	
+	public void setOptions(Set<Context> contexts, Map<String, String> options) {
+		Map<String, String> opts = this.options.get(contexts);
+		if (opts == null) {
+			this.options.put(contexts, options);
+		} else {
+			opts.putAll(options);
+		}
+	}
+	
+	public void setAllOptions(Map<Set<Context>, Map<String, String>> options) {
+		this.options.putAll(options);
+	}
 	
 	/**
 	 * Invoking this method will disallow persistence while saving the config file. If the Subject doesn't have any configuration, it'll be removed from the config file.

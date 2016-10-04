@@ -56,6 +56,7 @@ public class GroupCommand implements CommandExecutor {
 			case "weight": this.weight(src, group, args.<Integer>getOne("weight").orElse(null)); break;
 			case "test": this.test(src, group, param); break;
 			case "delete": this.delete(src, group); break;
+			case "option": this.setOption(src, group, param); break;
 			default: return CommandResult.empty();
 			}
 		} catch (Throwable e) {
@@ -63,6 +64,17 @@ public class GroupCommand implements CommandExecutor {
 		}
 		
 		return CommandResult.success();
+	}
+	
+	private void setOption(CommandSource src, GroupSubject group, String param) {
+		if (param == null) {
+			src.sendMessage(Text.of(TextColors.RED, "Usage: /pgroup <group> option <option-key> [value]"));
+			return;
+		}
+		String[] s = param.split(" ", 2);
+		String value = s.length>1 ? s[1] : "";
+		instance.setOption(group, s[0], value);
+		src.sendMessage(Text.of(TextColors.AQUA, "Group \"", TextColors.GOLD, group.getIdentifier(), TextColors.AQUA, "\" option ", TextColors.GOLD, s[0], TextColors.AQUA, " set to \"", TextColors.GOLD, value, TextColors.AQUA, "\""));
 	}
 
 	private void groupInfo(CommandSource src, GroupSubject group) {

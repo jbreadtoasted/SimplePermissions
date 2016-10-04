@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectData;
 
 import com.google.common.reflect.TypeToken;
 
@@ -30,12 +31,14 @@ public class UserSubjectCollectionSerializer implements TypeSerializer<UserSubje
 					denied.add(e.getKey());
 				}
 			}
-
+			
+			Map<String,String> options = s.getSubjectData().getOptions(SubjectData.GLOBAL_CONTEXT);
+			
 			List<String> groups = new ArrayList<String>();
 			for (GroupSubject gs : ((UserSubject) s).getGroups()) {
 				groups.add(gs.getIdentifier());
 			}
-			if (granted.isEmpty() && denied.isEmpty() && groups.isEmpty()) {
+			if (granted.isEmpty() && denied.isEmpty() && options.isEmpty() && groups.isEmpty()) {
 				value.removeChild(s.getIdentifier());
 			} else {
 				if (!granted.isEmpty()) {
@@ -48,6 +51,12 @@ public class UserSubjectCollectionSerializer implements TypeSerializer<UserSubje
 					value.getNode(s.getIdentifier()).getNode("denied").setValue(denied);
 				} else {
 					value.getNode(s.getIdentifier()).removeChild("denied");
+				}
+				
+				if (!options.isEmpty()) {
+					value.getNode(s.getIdentifier()).getNode("options").setValue(options);
+				} else {
+					value.getNode(s.getIdentifier()).removeChild("options");
 				}
 
 				if (!groups.isEmpty()) {
@@ -64,19 +73,27 @@ public class UserSubjectCollectionSerializer implements TypeSerializer<UserSubje
 		UserSubjectCollection collection = new UserSubjectCollection();
 		Map<Object, ? extends ConfigurationNode> users = value.getChildrenMap();
 		
-		for (Entry<Object, ? extends ConfigurationNode> userEntry : users.entrySet()) {
-			UserSubject subject = new UserSubject(userEntry.getKey().toString(), collection);
-			ConfigurationNode node = userEntry.getValue().getNode("granted");
+		for (Entry<Object, ? extends ConfigurationNode> entry : users.entrySet()) {
+			UserSubject subject = new UserSubject(entry.getKey().toString(), collection);
+			ConfigurationNode node = entry.getValue().getNode("granted");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, true);
 			}
 			
-			node = userEntry.getValue().getNode("denied");
+			node = entry.getValue().getNode("denied");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, false);
 			}
 			
-			node = userEntry.getValue().getNode("groups");
+			node = entry.getValue().getNode("options");
+			if (node.hasMapChildren()) {
+				Map<String, String> options = node.getValue(SimpleSubjectCollectionSerializer.optionsTypeToken);
+				if (options != null) {
+					subject.setOptions(SubjectData.GLOBAL_CONTEXT, options);
+				}
+			}
+			
+			node = entry.getValue().getNode("groups");
 			for (String groupName : node.getList(TypeToken.of(String.class))) {
 				if (SimplePermissions.instance().getGroupSubjects().hasRegistered(groupName)) {
 					subject.getGroups().add((GroupSubject) SimplePermissions.instance().getGroupSubjects().get(groupName));

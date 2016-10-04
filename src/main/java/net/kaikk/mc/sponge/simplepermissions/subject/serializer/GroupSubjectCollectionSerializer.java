@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectData;
 
 import com.google.common.reflect.TypeToken;
 
@@ -30,8 +31,9 @@ public class GroupSubjectCollectionSerializer implements TypeSerializer<GroupSub
 					denied.add(e.getKey());
 				}
 			}
-
-			if (granted.isEmpty() && denied.isEmpty() && gs.getParent()==null && gs.getWeight()==0 && gs.canBeRemovedIfEmpty()) {
+			Map<String,String> options = s.getSubjectData().getOptions(SubjectData.GLOBAL_CONTEXT);
+			
+			if (granted.isEmpty() && denied.isEmpty() && options.isEmpty() && gs.getParent()==null && gs.getWeight()==0 && gs.canBeRemovedIfEmpty()) {
 				value.removeChild(s.getIdentifier());
 			} else {
 				boolean persistent = true;
@@ -62,6 +64,13 @@ public class GroupSubjectCollectionSerializer implements TypeSerializer<GroupSub
 				} else {
 					value.getNode(s.getIdentifier()).removeChild("parent");
 				}
+
+				if (!options.isEmpty()) {
+					value.getNode(s.getIdentifier()).getNode("options").setValue(options);
+					persistent = false;
+				} else {
+					value.getNode(s.getIdentifier()).removeChild("options");
+				}
 				
 				if (persistent) {
 					value.getNode(s.getIdentifier()).getNode("persistent").setValue(true);
@@ -76,19 +85,27 @@ public class GroupSubjectCollectionSerializer implements TypeSerializer<GroupSub
 		Map<Object, ? extends ConfigurationNode> users = value.getChildrenMap();
 		Map<GroupSubject, String> parentsMap = new HashMap<GroupSubject, String>();
 		
-		for (Entry<Object, ? extends ConfigurationNode> groupEntry : users.entrySet()) {
-			GroupSubject subject = new GroupSubject(groupEntry.getKey().toString(), collection, groupEntry.getValue().getNode("weight").getInt(0));
-			ConfigurationNode node = groupEntry.getValue().getNode("granted");
+		for (Entry<Object, ? extends ConfigurationNode> entry : users.entrySet()) {
+			GroupSubject subject = new GroupSubject(entry.getKey().toString(), collection, entry.getValue().getNode("weight").getInt(0));
+			ConfigurationNode node = entry.getValue().getNode("granted");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, true);
 			}
 			
-			node = groupEntry.getValue().getNode("denied");
+			node = entry.getValue().getNode("denied");
 			for (String permission : node.getList(TypeToken.of(String.class))) {
 				subject.getSubjectData().getPermissions(null).put(permission, false);
 			}
+
+			node = entry.getValue().getNode("options");
+			if (node.hasMapChildren()) {
+				Map<String, String> options = node.getValue(SimpleSubjectCollectionSerializer.optionsTypeToken);
+				if (options != null) {
+					subject.setOptions(SubjectData.GLOBAL_CONTEXT, options);
+				}
+			}
 			
-			String parent = groupEntry.getValue().getNode("parent").getString();
+			String parent = entry.getValue().getNode("parent").getString();
 			if (parent!=null) {
 				parentsMap.put(subject, parent);
 			}
