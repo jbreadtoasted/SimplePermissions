@@ -31,8 +31,13 @@ public class GroupCommand implements CommandExecutor {
 		
 		String choice = args.<String>getOne("choice").orElse(null);
 		if (choice!=null && choice.equals("create")) {
-			this.create(src, groupName);
-			return CommandResult.success();
+			try {
+				this.create(src, groupName);
+				return CommandResult.success();
+			} catch (IOException | ObjectMappingException e) {
+				e.printStackTrace();
+				throw new CommandException(Text.of(TextColors.RED, "An error occurred: ", e.getMessage()), e);
+			}
 		}
 		
 		if (!instance.getGroupSubjects().hasRegistered(groupName) && !groupName.equals("default")) {
@@ -60,6 +65,7 @@ public class GroupCommand implements CommandExecutor {
 			default: return CommandResult.empty();
 			}
 		} catch (Throwable e) {
+			e.printStackTrace();
 			throw new CommandException(Text.of(TextColors.RED, "An error occurred: ", e.getMessage()), e);
 		}
 		
@@ -156,7 +162,7 @@ public class GroupCommand implements CommandExecutor {
 		src.sendMessage(Text.of(TextColors.AQUA,  "Group ", TextColors.GOLD, group.getIdentifier(), TextColors.AQUA, " permission ", permission, " value is ", TextColors.GOLD, group.getPermissionValue(null, permission)));
 	}
 
-	private void create(CommandSource src, String groupName) {
+	private void create(CommandSource src, String groupName) throws IOException, ObjectMappingException {
 		if (instance.getGroupSubjects().hasRegistered(groupName)) {
 			src.sendMessage(Text.of(TextColors.RED, "This group already exists!"));
 			return;
@@ -164,6 +170,7 @@ public class GroupCommand implements CommandExecutor {
 		
 		GroupSubject group = (GroupSubject) instance.getGroupSubjects().get(groupName);
 		((GroupSubjectCollection) instance.getGroupSubjects()).add(group);
+		instance.saveData();
 		src.sendMessage(Text.of(TextColors.AQUA, "Group ", TextColors.GOLD, group.getIdentifier(), TextColors.AQUA, " created"));
 	}
 	

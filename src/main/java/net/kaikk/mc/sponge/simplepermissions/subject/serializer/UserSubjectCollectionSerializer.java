@@ -96,7 +96,7 @@ public class UserSubjectCollectionSerializer implements TypeSerializer<UserSubje
 			node = entry.getValue().getNode("groups");
 			for (String groupName : node.getList(TypeToken.of(String.class))) {
 				if (SimplePermissions.instance().getGroupSubjects().hasRegistered(groupName)) {
-					subject.getGroups().add((GroupSubject) SimplePermissions.instance().getGroupSubjects().get(groupName));
+					subject.addGroup((GroupSubject) SimplePermissions.instance().getGroupSubjects().get(groupName));
 				}
 			}
 			

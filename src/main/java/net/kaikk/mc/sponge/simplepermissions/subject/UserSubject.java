@@ -2,7 +2,7 @@ package net.kaikk.mc.sponge.simplepermissions.subject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,8 +21,12 @@ import org.spongepowered.api.text.Text.Builder;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 
+import net.kaikk.mc.sponge.simplepermissions.SimplePermissions;
+
 public class UserSubject extends SimpleSubject {
 	private List<GroupSubject> groups = Collections.synchronizedList(new ArrayList<GroupSubject>());
+	/** Never access directly! Use cachedInheritedGroups() instead */
+	private GroupSubject[] cachedInheritedGroups;
 	
 	public UserSubject(String identifier, UserSubjectCollection collection) {
 		super(identifier, collection);
@@ -60,28 +64,14 @@ public class UserSubject extends SimpleSubject {
 		
 		permission = permission.toLowerCase();
 		
-		Iterator<GroupSubject> it = this.groups.iterator();
-		GroupSubject heaviest = it.next();
-		
-		while (it.hasNext()) {
-			GroupSubject g = it.next();
-			if (g.getWeight()>heaviest.getWeight()) {
-				Boolean b = g.getSubjectData().getPermissions(null).get(permission);
-				if (b!=null) {
-					heaviest = g;
-				}
-			}
-			
-			Optional<GroupSubject> heaviestParentGroup = g.getHeaviestParentGroupFor(permission);
-			if (heaviestParentGroup.isPresent() && heaviestParentGroup.get().getWeight()>heaviest.getWeight()) {
-				Boolean b = heaviestParentGroup.get().getSubjectData().getPermissions(null).get(permission);
-				if (b!=null) {
-					heaviest = heaviestParentGroup.get();
-				}
+		for (GroupSubject g : this.cachedInheritedGroups()) {
+			Tristate tristate = g.getPermissionValue(GLOBAL_CONTEXT, permission);
+			if (tristate != Tristate.UNDEFINED) {
+				return tristate;
 			}
 		}
 		
-		return heaviest.getPermissionValue(null, permission);
+		return Tristate.UNDEFINED;
 	}
 	
 	@Override
@@ -122,12 +112,27 @@ public class UserSubject extends SimpleSubject {
 		if (d) {
 			b.append(Text.of(TextColors.RED, "This user doesn't have any data yet!"));
 		}
-		
 		return b.build();
 	}
 
+	/** @return unmodifiable list of groups */
 	public List<GroupSubject> getGroups() {
-		return groups;
+		return Collections.unmodifiableList(groups);
+	}
+	
+	public void addGroup(GroupSubject group) {
+		SimplePermissions.instance().invalidateCache();
+		this.groups.add(group);
+	}
+	
+	public void removeGroup(GroupSubject group) {
+		SimplePermissions.instance().invalidateCache();
+		this.groups.remove(group);
+	}
+	
+	public void clearGroups() {
+		SimplePermissions.instance().invalidateCache();
+		this.groups.clear();
 	}
 	
 	@Override
@@ -146,5 +151,66 @@ public class UserSubject extends SimpleSubject {
 	@Override
 	public boolean canBeRemovedIfEmpty() {
 		return true;
+	}
+	
+	@Override
+	public Optional<String> getOption(Set<Context> contexts, String key) {
+		Optional<String> value = super.getOption(contexts, key);
+		if (value.isPresent()) {
+			return value;
+		}
+		
+		Optional<String> parent = this.getOptionFromHeaviestGroupFor(key);
+		if (parent.isPresent()) {
+			return parent;
+		}
+		
+		return this.getDefaultOptionValue(key);
+	}
+	
+	public Optional<String> getOptionFromHeaviestGroupFor(String key) {
+		if (this.groups.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		for (GroupSubject g : this.cachedInheritedGroups()) {
+			String value = g.getSubjectData().getOptions(GLOBAL_CONTEXT).get(key);
+			if (SimplePermissions.instance().debug) {
+				SimplePermissions.instance().logger().info("Requested option "+key+" to "+g.getClass().getSimpleName()+" '"+g.getIdentifier()+"', result: "+(value != null ? value : "undefined"));
+			}
+			if (value!=null) {
+				return Optional.of(value);
+			}
+		}
+
+		return Optional.empty();
+	}
+	
+	public Set<GroupSubject> getAllInheritedGroups() {
+		return getAllInheritedGroups(new LinkedHashSet<GroupSubject>());
+	}
+	
+	public Set<GroupSubject> getAllInheritedGroups(Set<GroupSubject> set) {
+		for (GroupSubject g : this.groups) {
+			if (set.add(g)) {
+				set.addAll(g.getAllInheritedGroups());
+			}
+		}
+		return set;
+	}
+	
+	/** Ordered array (highest weight to the lowest weight) */
+	public GroupSubject[] cachedInheritedGroups() {
+		if (this.cachedInheritedGroups == null) { // TODO invalid cache when user changes groups or group weights/parents changes
+			List<GroupSubject> parents = new ArrayList<GroupSubject>(this.getAllInheritedGroups());
+			Collections.sort(parents);
+			
+			this.cachedInheritedGroups = parents.toArray(new GroupSubject[parents.size()]);
+		}
+		return this.cachedInheritedGroups;
+	}
+	
+	public void invalidateInheritedGroupsCache() {
+		this.cachedInheritedGroups = null;
 	}
 }

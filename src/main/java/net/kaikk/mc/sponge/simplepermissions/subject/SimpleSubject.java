@@ -22,13 +22,13 @@ import net.kaikk.mc.sponge.simplepermissions.SimplePermissions;
 import net.kaikk.mc.sponge.simplepermissions.Utils;
 
 public class SimpleSubject implements Subject, SubjectData {
-	private final String identifier;
-	private final SimpleSubjectCollection collection; 
-	private final Map<String,Boolean> globalPermissions = new ConcurrentHashMap<String,Boolean>();
-	private final Map<String,String> globalOptions = new ConcurrentHashMap<String,String>();
-	private final Map<Set<Context>, Map<String, Boolean>> permissions = new ConcurrentHashMap<Set<Context>, Map<String, Boolean>>();
-	private final Map<Set<Context>, Map<String, String>> options = new ConcurrentHashMap<Set<Context>, Map<String, String>>();
-	private boolean removeIfEmpty = false;
+	protected final String identifier;
+	protected final SimpleSubjectCollection collection; 
+	protected final Map<String,Boolean> globalPermissions = new ConcurrentHashMap<String,Boolean>();
+	protected final Map<String,String> globalOptions = new ConcurrentHashMap<String,String>();
+	protected final Map<Set<Context>, Map<String, Boolean>> permissions = new ConcurrentHashMap<Set<Context>, Map<String, Boolean>>();
+	protected final Map<Set<Context>, Map<String, String>> options = new ConcurrentHashMap<Set<Context>, Map<String, String>>();
+	protected boolean removeIfEmpty = false;
 	
 	public SimpleSubject(String identifier, SimpleSubjectCollection collection) {
 		this.identifier = identifier;
@@ -98,7 +98,20 @@ public class SimpleSubject implements Subject, SubjectData {
 	}
 
 	public Tristate getDefaultPermissionValue(String permission) {
-		return ((SimpleSubjectCollection) this.getContainingCollection()).getDefaults().getPermissionValue(null, permission);
+		Subject def = ((SimpleSubjectCollection) this.getContainingCollection()).getDefaults();
+		if (def == this) {
+			return Tristate.UNDEFINED;
+		}
+		
+		return def.getPermissionValue(null, permission);
+	}
+	
+	public Optional<String> getDefaultOptionValue(String key) {
+		Subject def = ((SimpleSubjectCollection) this.getContainingCollection()).getDefaults();
+		if (def == this) {
+			return Optional.empty();
+		}
+		return def.getOption(GLOBAL_CONTEXT, key);
 	}
 
 	@Override
@@ -260,11 +273,18 @@ public class SimpleSubject implements Subject, SubjectData {
 
 	// SpongeAPI 5 Override
 	public Optional<String> getOption(Set<Context> contexts, String key) {
+		Optional<String> optValue = Optional.empty();
 		Map<String, String> opts = this.options.get(contexts);
-		if (opts == null) {
-			return Optional.empty();
+		if (opts != null) {
+			String value = opts.get(key);
+			if (value != null) {
+				optValue = Optional.of(value);
+			}
 		}
-		return Optional.ofNullable(opts.get(key));
+		if (SimplePermissions.instance().debug) {
+			SimplePermissions.instance().logger().info("Requested option "+key+" to "+this.getClass().getSimpleName()+" '"+identifier+"', result: "+(optValue.isPresent() ? optValue.get() : "undefined"));
+		}
+		return optValue;
 	}
 	
 	public void setOptions(Set<Context> contexts, Map<String, String> options) {

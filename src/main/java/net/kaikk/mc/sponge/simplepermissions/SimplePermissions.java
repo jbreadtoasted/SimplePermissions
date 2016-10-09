@@ -363,7 +363,7 @@ public class SimplePermissions implements PermissionService {
 		
 		GroupSubject gs = (GroupSubject) this.getGroupSubjects().get(groupName);
 		UserSubject us = (UserSubject) this.getUserSubjects().get(user.getIdentifier());
-		us.getGroups().add(gs);
+		us.addGroup(gs);
 		this.saveData();
 		return true;
 	}
@@ -387,8 +387,8 @@ public class SimplePermissions implements PermissionService {
 		
 		GroupSubject gs = (GroupSubject) this.getGroupSubjects().get(groupName);
 		UserSubject us = (UserSubject) this.getUserSubjects().get(user.getIdentifier());
-		us.getGroups().clear();
-		us.getGroups().add(gs);
+		us.clearGroups();
+		us.addGroup(gs);
 		this.saveData();
 		return true;
 	}
@@ -409,7 +409,7 @@ public class SimplePermissions implements PermissionService {
 		
 		GroupSubject gs = (GroupSubject) this.getGroupSubjects().get(groupName);
 		UserSubject us = (UserSubject) this.getUserSubjects().get(user.getIdentifier());
-		us.getGroups().remove(gs);
+		us.removeGroup(gs);
 		this.saveData();
 		return true;
 	}
@@ -426,5 +426,10 @@ public class SimplePermissions implements PermissionService {
 
 	public Logger logger() {
 		return logger;
+	}
+	
+	public void invalidateCache() {
+		this.users.invalidateCache();
+		this.groups.invalidateCache();
 	}
 }
