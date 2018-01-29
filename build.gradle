@@ -1,8 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-sourceCompatibility = 1.8
-version = '0.9.14'
+sourceCompatibility = 1.12.2
+version = '0.9.15'
 
 repositories {
 	mavenLocal()
@@ -18,5 +18,5 @@ repositories {
 }
 
 dependencies {
-	compile 'org.spongepowered:spongeapi:5.0.0-SNAPSHOT'
+	compile 'org.spongepowered:spongeapi:7.0.0-SNAPSHOT'
 }
